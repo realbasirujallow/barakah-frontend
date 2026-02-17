@@ -425,7 +425,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                           const SizedBox(width: 12),
-                          const Expanded(child: SizedBox()),
+                          Expanded(
+                            child: _QuickActionCard(
+                              icon: Icons.show_chart,
+                              label: 'Net Worth',
+                              onTap: () => Navigator.pushNamed(context, '/net-worth'),
+                            ),
+                          ),
                           const SizedBox(width: 12),
                           const Expanded(child: SizedBox()),
                         ],

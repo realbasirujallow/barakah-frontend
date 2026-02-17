@@ -27,6 +27,7 @@ import 'package:barakah_app/screens/wasiyyah_screen.dart';
 import 'package:barakah_app/screens/waqf_screen.dart';
 import 'package:barakah_app/screens/riba_detector_screen.dart';
 import 'package:barakah_app/screens/auto_categorize_screen.dart';
+import 'package:barakah_app/screens/net_worth_screen.dart';
 import 'package:barakah_app/services/notification_service.dart';
 
 void main() async {
@@ -89,6 +90,7 @@ class BarakahApp extends StatelessWidget {
               '/waqf': (context) => const WaqfScreen(),
               '/riba': (context) => const RibaDetectorScreen(),
               '/auto-categorize': (context) => const AutoCategorizeScreen(),
+              '/net-worth': (context) => const NetWorthScreen(),
             },
           );
         },

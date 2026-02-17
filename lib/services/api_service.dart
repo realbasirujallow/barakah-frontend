@@ -582,4 +582,16 @@ class ApiService {
     );
     return response.data as List<int>;
   }
+
+  // ─── Net Worth ───────────────────────────────────────
+
+  Future<Map<String, dynamic>> getNetWorthHistory({String period = '6m'}) async {
+    final response = await _dio.get('/api/net-worth/history', queryParameters: {'period': period});
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> recordNetWorthSnapshot() async {
+    final response = await _dio.post('/api/net-worth/snapshot');
+    return response.data as Map<String, dynamic>;
+  }
 }
