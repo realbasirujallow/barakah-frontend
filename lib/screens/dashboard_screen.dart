@@ -433,7 +433,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                           ),
                           const SizedBox(width: 12),
-                          const Expanded(child: SizedBox()),
+                          Expanded(
+                            child: _QuickActionCard(
+                              icon: Icons.family_restroom,
+                              label: 'Shared',
+                              onTap: () => Navigator.pushNamed(context, '/shared-finances'),
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 24),

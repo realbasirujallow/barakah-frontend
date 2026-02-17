@@ -607,4 +607,68 @@ class ApiService {
     final response = await _dio.post('/api/net-worth/snapshot');
     return response.data as Map<String, dynamic>;
   }
+
+  // ─── Shared Finances ────────────────────────────────
+
+  Future<Map<String, dynamic>> createSharedGroup(Map<String, dynamic> data) async {
+    final response = await _dio.post('/api/shared/groups/create', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> joinSharedGroup(String inviteCode) async {
+    final response = await _dio.post('/api/shared/groups/join', data: {'inviteCode': inviteCode});
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getSharedGroups() async {
+    final response = await _dio.get('/api/shared/groups/list');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getSharedGroupDetails(int groupId) async {
+    final response = await _dio.get('/api/shared/groups/$groupId');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> addSharedTransaction(int groupId, Map<String, dynamic> data) async {
+    final response = await _dio.post('/api/shared/groups/$groupId/transactions/add', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getSharedTransactions(int groupId, {String? type}) async {
+    final params = <String, dynamic>{};
+    if (type != null) params['type'] = type;
+    final response = await _dio.get('/api/shared/groups/$groupId/transactions', queryParameters: params);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> deleteSharedTransaction(int groupId, int txnId) async {
+    final response = await _dio.delete('/api/shared/groups/$groupId/transactions/$txnId');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getSharedGroupSummary(int groupId, {String period = 'month'}) async {
+    final response = await _dio.get('/api/shared/groups/$groupId/summary', queryParameters: {'period': period});
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> regenerateInviteCode(int groupId) async {
+    final response = await _dio.post('/api/shared/groups/$groupId/regenerate-invite');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> leaveSharedGroup(int groupId) async {
+    final response = await _dio.post('/api/shared/groups/$groupId/leave');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> deleteSharedGroup(int groupId) async {
+    final response = await _dio.delete('/api/shared/groups/$groupId');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> removeSharedGroupMember(int groupId, int memberId) async {
+    final response = await _dio.delete('/api/shared/groups/$groupId/members/$memberId');
+    return response.data as Map<String, dynamic>;
+  }
 }
