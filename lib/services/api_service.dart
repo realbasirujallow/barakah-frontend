@@ -558,4 +558,28 @@ class ApiService {
     final response = await _dio.get('/api/categorize/categories');
     return response.data as Map<String, dynamic>;
   }
+
+  // ─── Export Data (PDF/CSV) ───────────────────────────
+
+  Future<List<int>> exportTransactionsCsv({String period = 'month', String? type}) async {
+    final params = <String, dynamic>{'period': period};
+    if (type != null) params['type'] = type;
+    final response = await _dio.get(
+      '/api/transactions/export/csv',
+      queryParameters: params,
+      options: Options(responseType: ResponseType.bytes),
+    );
+    return response.data as List<int>;
+  }
+
+  Future<List<int>> exportTransactionsPdf({String period = 'month', String? type}) async {
+    final params = <String, dynamic>{'period': period};
+    if (type != null) params['type'] = type;
+    final response = await _dio.get(
+      '/api/transactions/export/pdf',
+      queryParameters: params,
+      options: Options(responseType: ResponseType.bytes),
+    );
+    return response.data as List<int>;
+  }
 }

@@ -1,9 +1,13 @@
+import 'dart:io';
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
@@ -17,6 +21,7 @@ class ReportsScreen extends StatefulWidget {
 
 class _ReportsScreenState extends State<ReportsScreen> {
   bool _isLoading = false;
+  String _selectedPeriod = 'month';
 
   final List<Map<String, dynamic>> _reportTypes = [
     {'id': 'portfolio', 'title': 'Portfolio Summary', 'icon': Icons.pie_chart, 'desc': 'Asset holdings & allocation'},
@@ -24,6 +29,169 @@ class _ReportsScreenState extends State<ReportsScreen> {
     {'id': 'transactions', 'title': 'Transaction History', 'icon': Icons.receipt_long, 'desc': 'Income & expense records'},
     {'id': 'full', 'title': 'Full Financial Report', 'icon': Icons.assessment, 'desc': 'Complete financial overview'},
   ];
+
+  final List<Map<String, String>> _periods = [
+    {'value': 'week', 'label': 'Last 7 Days'},
+    {'value': 'month', 'label': 'Last 30 Days'},
+    {'value': 'year', 'label': 'Last Year'},
+    {'value': 'all', 'label': 'All Time'},
+  ];
+
+  // ─── Server-side CSV export ──────────────────────────
+
+  Future<void> _exportCsv() async {
+    setState(() => _isLoading = true);
+    try {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final apiService = ApiService(authService);
+      final bytes = await apiService.exportTransactionsCsv(period: _selectedPeriod);
+
+      final dir = await getTemporaryDirectory();
+      final filename = 'barakah_transactions_${DateFormat('yyyyMMdd').format(DateTime.now())}.csv';
+      final file = File('${dir.path}/$filename');
+      await file.writeAsBytes(bytes);
+
+      await Share.shareXFiles([XFile(file.path)], text: 'Barakah Transaction Export (CSV)');
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error exporting CSV: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  // ─── Server-side PDF export ──────────────────────────
+
+  Future<void> _exportServerPdf() async {
+    setState(() => _isLoading = true);
+    try {
+      final authService = Provider.of<AuthService>(context, listen: false);
+      final apiService = ApiService(authService);
+      final bytes = await apiService.exportTransactionsPdf(period: _selectedPeriod);
+
+      final dir = await getTemporaryDirectory();
+      final filename = 'barakah_transactions_${DateFormat('yyyyMMdd').format(DateTime.now())}.pdf';
+      final file = File('${dir.path}/$filename');
+      await file.writeAsBytes(bytes);
+
+      await Share.shareXFiles([XFile(file.path)], text: 'Barakah Transaction Export (PDF)');
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error exporting PDF: $e'), backgroundColor: Colors.red),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _isLoading = false);
+    }
+  }
+
+  // ─── Export format picker bottom sheet ───────────────
+
+  void _showExportSheet() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setSheetState) {
+            return Padding(
+              padding: const EdgeInsets.fromLTRB(24, 16, 24, 32),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Center(
+                    child: Container(
+                      width: 40, height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  const Text('Export Transactions', style: TextStyle(
+                    fontSize: 20, fontWeight: FontWeight.bold,
+                  )),
+                  const SizedBox(height: 4),
+                  Text('Choose format and time period', style: TextStyle(color: Colors.grey[600])),
+                  const SizedBox(height: 20),
+
+                  // Period selector
+                  const Text('Time Period', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14)),
+                  const SizedBox(height: 8),
+                  Wrap(
+                    spacing: 8,
+                    children: _periods.map((p) {
+                      final isSelected = _selectedPeriod == p['value'];
+                      return ChoiceChip(
+                        label: Text(p['label']!),
+                        selected: isSelected,
+                        selectedColor: AppTheme.deepGreen.withAlpha(40),
+                        labelStyle: TextStyle(
+                          color: isSelected ? AppTheme.deepGreen : Colors.black87,
+                          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                        ),
+                        onSelected: (_) {
+                          setSheetState(() => _selectedPeriod = p['value']!);
+                          setState(() {});
+                        },
+                      );
+                    }).toList(),
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Export buttons
+                  Row(
+                    children: [
+                      Expanded(
+                        child: OutlinedButton.icon(
+                          onPressed: () {
+                            Navigator.pop(ctx);
+                            _exportCsv();
+                          },
+                          icon: const Icon(Icons.table_chart, color: AppTheme.deepGreen),
+                          label: const Text('CSV', style: TextStyle(color: AppTheme.deepGreen)),
+                          style: OutlinedButton.styleFrom(
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            side: const BorderSide(color: AppTheme.deepGreen),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.pop(ctx);
+                            _exportServerPdf();
+                          },
+                          icon: const Icon(Icons.picture_as_pdf),
+                          label: const Text('PDF'),
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.deepGreen,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 14),
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
 
   Future<void> _generateReport(String type) async {
     setState(() => _isLoading = true);
@@ -437,6 +605,77 @@ class _ReportsScreenState extends State<ReportsScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
+
+                // ── Export Data Section ──
+                Container(
+                  margin: const EdgeInsets.only(bottom: 16),
+                  child: Material(
+                    color: theme.cardColor,
+                    borderRadius: BorderRadius.circular(14),
+                    elevation: 2,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: _showExportSheet,
+                      child: Padding(
+                        padding: const EdgeInsets.all(16),
+                        child: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(12),
+                              decoration: BoxDecoration(
+                                gradient: const LinearGradient(
+                                  colors: [AppTheme.deepGreen, Color(0xFF43A047)],
+                                ),
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              child: const Icon(Icons.file_download, color: Colors.white, size: 28),
+                            ),
+                            const SizedBox(width: 16),
+                            const Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text('Export Data', style: TextStyle(
+                                    fontWeight: FontWeight.bold, fontSize: 17,
+                                  )),
+                                  SizedBox(height: 2),
+                                  Text('Download transactions as PDF or CSV',
+                                      style: TextStyle(color: Colors.grey, fontSize: 13)),
+                                ],
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                              decoration: BoxDecoration(
+                                color: AppTheme.deepGreen.withAlpha(20),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(Icons.table_chart, size: 14, color: AppTheme.deepGreen),
+                                  SizedBox(width: 4),
+                                  Text('CSV', style: TextStyle(fontSize: 11, color: AppTheme.deepGreen, fontWeight: FontWeight.bold)),
+                                  SizedBox(width: 6),
+                                  Icon(Icons.picture_as_pdf, size: 14, color: AppTheme.deepGreen),
+                                  SizedBox(width: 4),
+                                  Text('PDF', style: TextStyle(fontSize: 11, color: AppTheme.deepGreen, fontWeight: FontWeight.bold)),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+
+                const Padding(
+                  padding: EdgeInsets.only(left: 4, bottom: 8),
+                  child: Text('Detailed Reports', style: TextStyle(
+                    fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.deepGreen,
+                  )),
+                ),
 
                 // Report options
                 ..._reportTypes.map((r) => Container(
