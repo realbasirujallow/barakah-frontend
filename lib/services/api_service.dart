@@ -153,8 +153,21 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
-  Future<Map<String, dynamic>> getHalalStocks() async {
-    final response = await _dio.get('/api/halal/list');
+  Future<Map<String, dynamic>> getHalalStocks({String? search, String? sector}) async {
+    final params = <String, dynamic>{};
+    if (search != null && search.isNotEmpty) params['search'] = search;
+    if (sector != null && sector.isNotEmpty) params['sector'] = sector;
+    final response = await _dio.get('/api/halal/list', queryParameters: params);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getHalalSectors() async {
+    final response = await _dio.get('/api/halal/sectors');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getHalalStats() async {
+    final response = await _dio.get('/api/halal/stats');
     return response.data as Map<String, dynamic>;
   }
 
