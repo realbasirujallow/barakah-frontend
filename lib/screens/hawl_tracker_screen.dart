@@ -93,7 +93,7 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
                 const Text('Track Hawl', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 8),
                 Text('Hawl is the lunar year (354 days) that must pass before Zakat is due.',
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, fontSize: 13)),
                 const SizedBox(height: 16),
                 TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Asset Name', border: OutlineInputBorder())),
                 const SizedBox(height: 12),
@@ -151,6 +151,7 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final fmt = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
     final dateFmt = DateFormat('MMM dd, yyyy');
 
@@ -212,9 +213,9 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
                       child: Column(
                         children: [
                           const SizedBox(height: 40),
-                          Icon(Icons.access_time, size: 64, color: Colors.grey.shade300),
+                          Icon(Icons.access_time, size: 64, color: theme.colorScheme.onSurfaceVariant),
                           const SizedBox(height: 16),
-                          Text('No assets being tracked', style: TextStyle(fontSize: 18, color: Colors.grey.shade600)),
+                          Text('No assets being tracked', style: TextStyle(fontSize: 18, color: theme.colorScheme.onSurfaceVariant)),
                           const SizedBox(height: 8),
                           const Text('Add an asset to track its Hawl period'),
                         ],
@@ -234,7 +235,7 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
                         margin: const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: theme.cardColor,
                           borderRadius: BorderRadius.circular(12),
                           border: zakatDue ? Border.all(color: AppTheme.gold, width: 2) : null,
                         ),
@@ -256,7 +257,7 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
                                       Text(tracker['assetName'] as String? ?? '',
                                           style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                                       Text(fmt.format(tracker['amount']),
-                                          style: TextStyle(color: Colors.grey.shade600)),
+                                          style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
                                     ],
                                   ),
                                 ),
@@ -304,7 +305,7 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
                                     borderRadius: BorderRadius.circular(4),
                                     child: LinearProgressIndicator(
                                       value: (progress / 100).clamp(0, 1),
-                                      backgroundColor: Colors.grey.shade200,
+                                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
                                       valueColor: AlwaysStoppedAnimation(
                                         zakatDue ? AppTheme.gold : AppTheme.deepGreen,
                                       ),
@@ -323,10 +324,10 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text('Start: ${dateFmt.format(DateTime.fromMillisecondsSinceEpoch(startDate))}',
-                                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                                    style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12)),
                                 Text(zakatDue ? 'Hawl Complete' : '$daysRemaining days left',
                                     style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12,
-                                        color: zakatDue ? AppTheme.gold : Colors.grey.shade700)),
+                                        color: zakatDue ? AppTheme.gold : theme.colorScheme.onSurfaceVariant)),
                               ],
                             ),
                             if (zakatDue) ...[

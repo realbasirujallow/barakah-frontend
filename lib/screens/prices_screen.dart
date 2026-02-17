@@ -113,6 +113,7 @@ class _PricesScreenState extends State<PricesScreen> with SingleTickerProviderSt
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
 
     return Scaffold(
@@ -137,7 +138,7 @@ class _PricesScreenState extends State<PricesScreen> with SingleTickerProviderSt
           // Search bar
           Container(
             padding: const EdgeInsets.all(16),
-            color: Colors.white,
+            color: theme.cardColor,
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
@@ -158,10 +159,10 @@ class _PricesScreenState extends State<PricesScreen> with SingleTickerProviderSt
                       ),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
-                  borderSide: BorderSide(color: Colors.grey[300]!),
+                  borderSide: BorderSide(color: theme.dividerColor),
                 ),
                 filled: true,
-                fillColor: Colors.grey[50],
+                fillColor: theme.colorScheme.surfaceContainerLowest,
               ),
               onSubmitted: _searchPrice,
             ),
@@ -194,7 +195,7 @@ class _PricesScreenState extends State<PricesScreen> with SingleTickerProviderSt
                               margin: const EdgeInsets.only(bottom: 8),
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: theme.cardColor,
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
@@ -232,7 +233,7 @@ class _PricesScreenState extends State<PricesScreen> with SingleTickerProviderSt
                                         Text(
                                           price.symbol.toUpperCase(),
                                           style: TextStyle(
-                                            color: Colors.grey[500],
+                                            color: theme.colorScheme.onSurfaceVariant,
                                             fontSize: 13,
                                           ),
                                         ),
@@ -295,7 +296,7 @@ class _PricesScreenState extends State<PricesScreen> with SingleTickerProviderSt
                               margin: const EdgeInsets.only(bottom: 8),
                               padding: const EdgeInsets.all(16),
                               decoration: BoxDecoration(
-                                color: Colors.white,
+                                color: theme.cardColor,
                                 borderRadius: BorderRadius.circular(12),
                                 boxShadow: [
                                   BoxShadow(
@@ -333,7 +334,7 @@ class _PricesScreenState extends State<PricesScreen> with SingleTickerProviderSt
                                         Text(
                                           'Open: ${currencyFormat.format(price.openPrice)}',
                                           style: TextStyle(
-                                            color: Colors.grey[500],
+                                            color: theme.colorScheme.onSurfaceVariant,
                                             fontSize: 13,
                                           ),
                                         ),

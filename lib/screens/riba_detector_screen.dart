@@ -55,6 +55,7 @@ class _RibaDetectorScreenState extends State<RibaDetectorScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final fmt = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
 
     return Scaffold(
@@ -72,16 +73,16 @@ class _RibaDetectorScreenState extends State<RibaDetectorScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: Column(
+          ? Center(child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                CircularProgressIndicator(color: AppTheme.deepGreen),
-                SizedBox(height: 16),
-                Text('Scanning transactions for riba...', style: TextStyle(color: Colors.grey)),
+                const CircularProgressIndicator(color: AppTheme.deepGreen),
+                const SizedBox(height: 16),
+                Text('Scanning transactions for riba...', style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
               ],
             ))
           : _report == null
-              ? const Center(child: Text('Failed to scan', style: TextStyle(color: Colors.grey)))
+              ? Center(child: Text('Failed to scan', style: TextStyle(color: theme.colorScheme.onSurfaceVariant)))
               : RefreshIndicator(
                   onRefresh: _scanTransactions,
                   child: ListView(
@@ -212,6 +213,7 @@ class _RibaDetectorScreenState extends State<RibaDetectorScreen> {
   }
 
   List<Widget> _buildFlaggedList(NumberFormat fmt) {
+    final theme = Theme.of(context);
     final ribaList = _report!['ribaTransactions'] as List<dynamic>? ?? [];
     return ribaList.map((item) {
       final tx = item as Map<String, dynamic>;
@@ -223,7 +225,7 @@ class _RibaDetectorScreenState extends State<RibaDetectorScreen> {
         margin: const EdgeInsets.only(bottom: 8),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(color: _riskColor(riskLevel).withAlpha(60)),
         ),
@@ -258,7 +260,7 @@ class _RibaDetectorScreenState extends State<RibaDetectorScreen> {
               child: Row(children: [
                 Icon(Icons.flag, size: 14, color: Colors.red.shade300),
                 const SizedBox(width: 6),
-                Expanded(child: Text(f as String, style: TextStyle(fontSize: 12, color: Colors.grey.shade700))),
+                Expanded(child: Text(f as String, style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant))),
               ]),
             )),
             if (alternatives != null) ...[
@@ -279,6 +281,7 @@ class _RibaDetectorScreenState extends State<RibaDetectorScreen> {
   }
 
   List<Widget> _buildAlternativesList() {
+    final theme = Theme.of(context);
     final alternatives = _report!['islamicAlternatives'] as Map<String, dynamic>? ?? {};
     return alternatives.entries.map((e) {
       final alt = e.value as Map<String, dynamic>;
@@ -286,7 +289,7 @@ class _RibaDetectorScreenState extends State<RibaDetectorScreen> {
         margin: const EdgeInsets.only(top: 8),
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Column(

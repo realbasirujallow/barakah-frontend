@@ -70,6 +70,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   void _showAddTransactionDialog() {
+    final theme = Theme.of(context);
     final amountController = TextEditingController();
     final descriptionController = TextEditingController();
     String type = 'expense';
@@ -107,7 +108,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   child: Container(
                     width: 40, height: 4,
                     decoration: BoxDecoration(
-                      color: Colors.grey[300],
+                      color: theme.dividerColor,
                       borderRadius: BorderRadius.circular(2),
                     ),
                   ),
@@ -126,13 +127,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
-                            color: type == 'income' ? Colors.green : Colors.grey[100],
+                            color: type == 'income' ? Colors.green : theme.colorScheme.surfaceContainerLowest,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Center(
                             child: Text('Income',
                                 style: TextStyle(
-                                  color: type == 'income' ? Colors.white : Colors.grey[600],
+                                  color: type == 'income' ? Colors.white : theme.colorScheme.onSurfaceVariant,
                                   fontWeight: FontWeight.w600,
                                 )),
                           ),
@@ -146,13 +147,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 12),
                           decoration: BoxDecoration(
-                            color: type == 'expense' ? Colors.red : Colors.grey[100],
+                            color: type == 'expense' ? Colors.red : theme.colorScheme.surfaceContainerLowest,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Center(
                             child: Text('Expense',
                                 style: TextStyle(
-                                  color: type == 'expense' ? Colors.white : Colors.grey[600],
+                                  color: type == 'expense' ? Colors.white : theme.colorScheme.onSurfaceVariant,
                                   fontWeight: FontWeight.w600,
                                 )),
                           ),
@@ -169,7 +170,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     labelText: 'Category',
                     prefixIcon: const Icon(Icons.category_outlined),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    filled: true, fillColor: Colors.grey[50],
+                    filled: true, fillColor: theme.colorScheme.surfaceContainerLowest,
                   ),
                   items: categories.map((c) => DropdownMenuItem(
                     value: c,
@@ -186,7 +187,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     labelText: 'Amount (USD)',
                     prefixIcon: const Icon(Icons.attach_money),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    filled: true, fillColor: Colors.grey[50],
+                    filled: true, fillColor: theme.colorScheme.surfaceContainerLowest,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -197,7 +198,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     labelText: 'Description (optional)',
                     prefixIcon: const Icon(Icons.notes),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                    filled: true, fillColor: Colors.grey[50],
+                    filled: true, fillColor: theme.colorScheme.surfaceContainerLowest,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -225,7 +226,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                         labelText: 'Frequency',
                         prefixIcon: const Icon(Icons.schedule),
                         border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                        filled: true, fillColor: Colors.grey[50],
+                        filled: true, fillColor: theme.colorScheme.surfaceContainerLowest,
                       ),
                       items: const [
                         DropdownMenuItem(value: 'daily', child: Text('Daily')),
@@ -278,6 +279,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
     final totalIncome = (_summary['totalIncome'] as num?)?.toDouble() ?? 0;
     final totalExpenses = (_summary['totalExpenses'] as num?)?.toDouble() ?? 0;
@@ -353,13 +355,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                     Container(
                       padding: const EdgeInsets.all(32),
                       decoration: BoxDecoration(
-                        color: Colors.white, borderRadius: BorderRadius.circular(16),
+                        color: theme.cardColor, borderRadius: BorderRadius.circular(16),
                       ),
                       child: Column(
                         children: [
-                          Icon(Icons.receipt_long_outlined, size: 64, color: Colors.grey[300]),
+                          Icon(Icons.receipt_long_outlined, size: 64, color: theme.dividerColor),
                           const SizedBox(height: 16),
-                          Text('No transactions yet', style: TextStyle(fontSize: 18, color: Colors.grey[600])),
+                          Text('No transactions yet', style: TextStyle(fontSize: 18, color: theme.colorScheme.onSurfaceVariant)),
                         ],
                       ),
                     )
@@ -395,10 +397,11 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(14),
         boxShadow: [BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 4, offset: const Offset(0, 2))],
       ),
@@ -407,7 +410,7 @@ class _SummaryCard extends StatelessWidget {
         children: [
           Icon(icon, color: color, size: 20),
           const SizedBox(height: 6),
-          Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
+          Text(label, style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12)),
           const SizedBox(height: 2),
           FittedBox(
             fit: BoxFit.scaleDown,
@@ -432,6 +435,7 @@ class _TransactionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final isIncome = transaction.isIncome;
     final dateFormat = DateFormat('MMM d, yyyy');
 
@@ -439,7 +443,7 @@ class _TransactionTile extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
         boxShadow: [BoxShadow(color: Colors.black.withAlpha(8), blurRadius: 4, offset: const Offset(0, 1))],
       ),
@@ -467,7 +471,7 @@ class _TransactionTile extends StatelessWidget {
                 ),
                 Text(
                   '${transaction.category[0].toUpperCase()}${transaction.category.substring(1)} • ${dateFormat.format(transaction.dateTime)}',
-                  style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                  style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12),
                 ),
                 if (transaction.recurring)
                   Padding(
@@ -501,7 +505,7 @@ class _TransactionTile extends StatelessWidget {
                 onTap: onDelete,
                 child: Padding(
                   padding: const EdgeInsets.only(top: 4),
-                  child: Icon(Icons.delete_outline, size: 16, color: Colors.grey[400]),
+                  child: Icon(Icons.delete_outline, size: 16, color: theme.colorScheme.onSurfaceVariant),
                 ),
               ),
             ],

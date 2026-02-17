@@ -65,6 +65,7 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
   }
 
   void _showAddSadaqah() {
+    final theme = Theme.of(context);
     String selectedCategory = 'general';
     final amountCtrl = TextEditingController();
     final recipientCtrl = TextEditingController();
@@ -86,7 +87,7 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
                 const Text('Record Sadaqah', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 Text('"Charity does not decrease wealth." — Prophet Muhammad (PBUH)',
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontStyle: FontStyle.italic)),
+                    style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13, fontStyle: FontStyle.italic)),
                 const SizedBox(height: 16),
                 TextField(controller: amountCtrl, keyboardType: TextInputType.number,
                     decoration: const InputDecoration(labelText: 'Amount', border: OutlineInputBorder(), prefixIcon: Icon(Icons.attach_money))),
@@ -162,6 +163,7 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final fmt = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
     final dateFmt = DateFormat('MMM dd, yyyy');
 
@@ -238,9 +240,9 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
                       child: Column(
                         children: [
                           const SizedBox(height: 40),
-                          Icon(Icons.volunteer_activism, size: 64, color: Colors.grey.shade300),
+                          Icon(Icons.volunteer_activism, size: 64, color: theme.colorScheme.onSurfaceVariant),
                           const SizedBox(height: 16),
-                          Text('No sadaqah recorded yet', style: TextStyle(fontSize: 16, color: Colors.grey.shade600)),
+                          Text('No sadaqah recorded yet', style: TextStyle(fontSize: 16, color: theme.colorScheme.onSurfaceVariant)),
                         ],
                       ),
                     )
@@ -254,7 +256,7 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: theme.cardColor,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -273,9 +275,9 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
                                       style: const TextStyle(fontWeight: FontWeight.bold)),
                                   if (donation['recipientName'] != null)
                                     Text('To: ${donation['recipientName']}',
-                                        style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12)),
                                   Text(dateFmt.format(DateTime.fromMillisecondsSinceEpoch(date)),
-                                      style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                                      style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12)),
                                 ],
                               ),
                             ),

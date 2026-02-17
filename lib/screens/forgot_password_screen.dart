@@ -88,6 +88,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Reset Password')),
       body: SingleChildScrollView(
@@ -111,7 +112,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               _tokenSent
                   ? 'Enter the token and your new password below.'
                   : 'Enter your email to receive a password reset token.',
-              style: TextStyle(color: Colors.grey[600], fontSize: 14),
+              style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 14),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),

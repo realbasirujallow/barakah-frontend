@@ -18,13 +18,14 @@ class ZakatIndicator extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
     final progress = (totalValue / nisabThreshold).clamp(0.0, 1.0);
 
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: theme.cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
@@ -81,7 +82,7 @@ class ZakatIndicator extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               minHeight: 8,
-              backgroundColor: Colors.grey[200],
+              backgroundColor: theme.colorScheme.surfaceContainerHighest,
               valueColor: AlwaysStoppedAnimation(
                 zakatDue ? AppTheme.deepGreen : Colors.orange,
               ),
@@ -98,7 +99,7 @@ class ZakatIndicator extends StatelessWidget {
               ),
               Text(
                 'Nisab: ${currencyFormat.format(nisabThreshold)}',
-                style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12),
               ),
             ],
           ),
@@ -127,7 +128,7 @@ class ZakatIndicator extends StatelessWidget {
                   Text(
                     '2.5%',
                     style: TextStyle(
-                      color: Colors.grey[600],
+                      color: theme.colorScheme.onSurfaceVariant,
                       fontSize: 12,
                     ),
                   ),

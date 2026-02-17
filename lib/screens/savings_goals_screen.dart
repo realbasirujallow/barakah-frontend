@@ -176,7 +176,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
           children: [
             Text(
               'Remaining: \$${NumberFormat('#,##0.00').format((goal['remaining'] as num?)?.toDouble() ?? 0)}',
-              style: TextStyle(color: Colors.grey[600]),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
             const SizedBox(height: 16),
             TextField(
@@ -219,6 +219,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
   @override
   Widget build(BuildContext context) {
     final fmt = NumberFormat('#,##0.00');
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(title: const Text('Savings Goals')),
       floatingActionButton: FloatingActionButton(
@@ -275,11 +276,11 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
                       child: Column(
                         children: [
                           const SizedBox(height: 40),
-                          Icon(Icons.savings, size: 64, color: Colors.grey[300]),
+                          Icon(Icons.savings, size: 64, color: theme.dividerColor),
                           const SizedBox(height: 16),
-                          Text('No savings goals yet', style: TextStyle(color: Colors.grey[500], fontSize: 16)),
+                          Text('No savings goals yet', style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 16)),
                           const SizedBox(height: 8),
-                          Text('Tap + to create your first goal', style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+                          Text('Tap + to create your first goal', style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 14)),
                         ],
                       ),
                     )
@@ -292,6 +293,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
   }
 
   Widget _buildGoalCard(Map<String, dynamic> goal, NumberFormat fmt) {
+    final theme = Theme.of(context);
     final progress = ((goal['progress'] as num?)?.toDouble() ?? 0) / 100;
     final currentAmount = (goal['currentAmount'] as num?)?.toDouble() ?? 0;
     final targetAmount = (goal['targetAmount'] as num?)?.toDouble() ?? 0;
@@ -325,7 +327,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(goal['name'] ?? '', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
-                        Text(_categoryLabel(category), style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+                        Text(_categoryLabel(category), style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12)),
                       ],
                     ),
                   ),
@@ -357,7 +359,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text('\$${fmt.format(currentAmount)}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppTheme.deepGreen)),
-                  Text('\$${fmt.format(targetAmount)}', style: TextStyle(color: Colors.grey[500], fontSize: 13)),
+                  Text('\$${fmt.format(targetAmount)}', style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13)),
                 ],
               ),
               const SizedBox(height: 8),
@@ -366,14 +368,14 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
                 child: LinearProgressIndicator(
                   value: progress.clamp(0, 1).toDouble(),
                   minHeight: 8,
-                  backgroundColor: Colors.grey[200],
+                  backgroundColor: theme.colorScheme.surfaceContainerHighest,
                   valueColor: AlwaysStoppedAnimation(completed ? AppTheme.gold : AppTheme.deepGreen),
                 ),
               ),
               const SizedBox(height: 6),
               Text(
                 '${(progress * 100).toStringAsFixed(1)}% complete',
-                style: TextStyle(color: Colors.grey[500], fontSize: 12),
+                style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12),
               ),
             ],
           ),

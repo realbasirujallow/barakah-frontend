@@ -182,6 +182,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
   Widget build(BuildContext context) {
     final fmt = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
     final monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: AppTheme.cream,
@@ -295,9 +296,9 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       child: Column(
                         children: [
                           const SizedBox(height: 40),
-                          Icon(Icons.pie_chart_outline, size: 64, color: Colors.grey.shade300),
+                          Icon(Icons.pie_chart_outline, size: 64, color: theme.dividerColor),
                           const SizedBox(height: 16),
-                          Text('No budgets set', style: TextStyle(fontSize: 18, color: Colors.grey.shade600)),
+                          Text('No budgets set', style: TextStyle(fontSize: 18, color: theme.colorScheme.onSurfaceVariant)),
                           const SizedBox(height: 8),
                           const Text('Tap + to create your first budget'),
                         ],
@@ -316,7 +317,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                         margin: const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: theme.cardColor,
                           borderRadius: BorderRadius.circular(12),
                           border: overBudget ? Border.all(color: Colors.red, width: 1.5) : null,
                         ),
@@ -365,7 +366,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                               borderRadius: BorderRadius.circular(4),
                               child: LinearProgressIndicator(
                                 value: (pct / 100).clamp(0, 1),
-                                backgroundColor: Colors.grey.shade200,
+                                backgroundColor: theme.colorScheme.surfaceContainerHighest,
                                 valueColor: AlwaysStoppedAnimation(
                                   pct > 100 ? Colors.red : pct > 80 ? Colors.orange : AppTheme.deepGreen,
                                 ),
@@ -377,7 +378,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text('${fmt.format(spent)} / ${fmt.format(limit)}',
-                                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                                    style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13)),
                                 Text('${pct.toStringAsFixed(0)}%',
                                     style: TextStyle(
                                       fontWeight: FontWeight.bold,

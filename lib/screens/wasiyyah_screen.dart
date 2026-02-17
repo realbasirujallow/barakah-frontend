@@ -60,6 +60,7 @@ class _WasiyyahScreenState extends State<WasiyyahScreen> {
   }
 
   void _showIslamicSharesInfo() {
+    final theme = Theme.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -87,7 +88,7 @@ class _WasiyyahScreenState extends State<WasiyyahScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(e.key[0].toUpperCase() + e.key.substring(1), style: const TextStyle(fontWeight: FontWeight.bold)),
-                          Text(e.value.toString(), style: TextStyle(fontSize: 13, color: Colors.grey.shade700)),
+                          Text(e.value.toString(), style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
                         ],
                       ),
                     ),
@@ -96,7 +97,7 @@ class _WasiyyahScreenState extends State<WasiyyahScreen> {
               )),
               const Divider(),
               Text('Voluntary bequests (wasiyyah) are limited to 1/3 of your estate per Islamic law.',
-                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600, fontStyle: FontStyle.italic)),
+                  style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant, fontStyle: FontStyle.italic)),
             ],
           ),
         ),
@@ -213,6 +214,7 @@ class _WasiyyahScreenState extends State<WasiyyahScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: AppTheme.cream,
       appBar: AppBar(
@@ -301,11 +303,11 @@ class _WasiyyahScreenState extends State<WasiyyahScreen> {
                     Center(
                       child: Column(children: [
                         const SizedBox(height: 40),
-                        Icon(Icons.description_outlined, size: 64, color: Colors.grey.shade300),
+                        Icon(Icons.description_outlined, size: 64, color: theme.colorScheme.onSurfaceVariant),
                         const SizedBox(height: 16),
-                        Text('No beneficiaries added yet', style: TextStyle(fontSize: 16, color: Colors.grey.shade600)),
+                        Text('No beneficiaries added yet', style: TextStyle(fontSize: 16, color: theme.colorScheme.onSurfaceVariant)),
                         const SizedBox(height: 4),
-                        Text('Create your Islamic will', style: TextStyle(fontSize: 13, color: Colors.grey.shade500)),
+                        Text('Create your Islamic will', style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
                       ]),
                     )
                   else
@@ -317,7 +319,7 @@ class _WasiyyahScreenState extends State<WasiyyahScreen> {
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.all(14),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: theme.cardColor,
                           borderRadius: BorderRadius.circular(12),
                           border: isFixed ? Border.all(color: AppTheme.deepGreen.withAlpha(50)) : null,
                         ),
@@ -349,11 +351,11 @@ class _WasiyyahScreenState extends State<WasiyyahScreen> {
                                     ),
                                     const SizedBox(width: 6),
                                     Text(relationship[0].toUpperCase() + relationship.substring(1),
-                                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                                        style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
                                   ]),
                                   if (ben['assetDescription'] != null)
                                     Text(ben['assetDescription'] as String,
-                                        style: TextStyle(fontSize: 12, color: Colors.grey.shade500)),
+                                        style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
                                 ],
                               ),
                             ),

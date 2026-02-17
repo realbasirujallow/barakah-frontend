@@ -95,6 +95,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
 
   // ─── Portfolio Tab ──────────────────────────────────
   Widget _buildPortfolioTab() {
+    final theme = Theme.of(context);
     if (_assets.isEmpty) {
       return const Center(child: Text('No assets to analyze'));
     }
@@ -128,7 +129,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardTheme.color ?? Colors.white,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Column(
@@ -198,7 +199,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardTheme.color ?? Colors.white,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Column(
@@ -221,7 +222,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(a.name, style: const TextStyle(fontWeight: FontWeight.w600)),
-                            Text(a.type, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                            Text(a.type, style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
                           ],
                         ),
                       ),
@@ -231,7 +232,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                           Text(formatter.format(a.value),
                               style: const TextStyle(fontWeight: FontWeight.bold)),
                           Text('${pct.toStringAsFixed(1)}%',
-                              style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                              style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
                         ],
                       ),
                     ],
@@ -247,6 +248,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
 
   // ─── Spending Tab ───────────────────────────────────
   Widget _buildSpendingTab() {
+    final theme = Theme.of(context);
     // Group expenses by category
     final expenses = _transactions.where((t) => t.type == 'expense').toList();
     final income = _transactions.where((t) => t.type == 'income').toList();
@@ -292,7 +294,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                 selected: isSelected,
                 selectedColor: AppTheme.deepGreen,
                 labelStyle: TextStyle(
-                  color: isSelected ? Colors.white : Colors.black87,
+                  color: isSelected ? Colors.white : theme.colorScheme.onSurface,
                 ),
                 onSelected: (_) {
                   setState(() => _selectedPeriod = p);
@@ -322,7 +324,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardTheme.color ?? Colors.white,
+              color: theme.cardColor,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Column(
@@ -373,7 +375,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                         const SizedBox(width: 8),
                         Expanded(child: Text(entry.key)),
                         Text('${pct.toStringAsFixed(1)}%',
-                            style: const TextStyle(color: Colors.grey, fontSize: 13)),
+                            style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13)),
                         const SizedBox(width: 8),
                         Text(formatter.format(entry.value),
                             style: const TextStyle(fontWeight: FontWeight.bold)),
@@ -388,18 +390,18 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
           Container(
             padding: const EdgeInsets.all(40),
             decoration: BoxDecoration(
-              color: Theme.of(context).cardTheme.color ?? Colors.white,
+              color: theme.cardColor,
               borderRadius: BorderRadius.circular(20),
             ),
             child: Column(
               children: [
-                Icon(Icons.pie_chart_outline, size: 64, color: Colors.grey[300]),
+                Icon(Icons.pie_chart_outline, size: 64, color: theme.dividerColor),
                 const SizedBox(height: 16),
                 Text('No spending data yet',
-                    style: TextStyle(color: Colors.grey[600], fontSize: 16)),
+                    style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 16)),
                 const SizedBox(height: 8),
-                const Text('Add transactions to see spending analytics',
-                    style: TextStyle(color: Colors.grey)),
+                Text('Add transactions to see spending analytics',
+                    style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
               ],
             ),
           ),
@@ -409,6 +411,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
 
   // ─── Trends Tab ─────────────────────────────────────
   Widget _buildTrendsTab() {
+    final theme = Theme.of(context);
     // Group transactions by day for a line chart
     final Map<String, double> incomeByDay = {};
     final Map<String, double> expenseByDay = {};
@@ -437,7 +440,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardTheme.color ?? Colors.white,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Column(
@@ -460,7 +463,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                   height: 200,
                   child: Center(
                     child: Text('No trend data available',
-                        style: TextStyle(color: Colors.grey[500])),
+                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
                   ),
                 )
               else
@@ -484,7 +487,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                             reservedSize: 50,
                             getTitlesWidget: (value, _) => Text(
                               _shortAmount(value),
-                              style: const TextStyle(fontSize: 10, color: Colors.grey),
+                              style: TextStyle(fontSize: 10, color: theme.colorScheme.onSurfaceVariant),
                             ),
                           ),
                         ),
@@ -497,7 +500,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                               return Padding(
                                 padding: const EdgeInsets.only(top: 8),
                                 child: Text(last7[i],
-                                    style: const TextStyle(fontSize: 10, color: Colors.grey)),
+                                    style: TextStyle(fontSize: 10, color: theme.colorScheme.onSurfaceVariant)),
                               );
                             },
                           ),
@@ -536,7 +539,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         Container(
           padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
-            color: Theme.of(context).cardTheme.color ?? Colors.white,
+            color: theme.cardColor,
             borderRadius: BorderRadius.circular(20),
           ),
           child: Column(
@@ -550,7 +553,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
                 Padding(
                   padding: const EdgeInsets.all(20),
                   child: Center(child: Text('No expense data',
-                      style: TextStyle(color: Colors.grey[500]))),
+                      style: TextStyle(color: theme.colorScheme.onSurfaceVariant))),
                 )
               else
                 ..._buildCategoryBars(),
@@ -594,7 +597,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
               child: LinearProgressIndicator(
                 value: pct,
                 minHeight: 8,
-                backgroundColor: Colors.grey.withAlpha(40),
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
                 valueColor: const AlwaysStoppedAnimation(AppTheme.deepGreen),
               ),
             ),
@@ -633,7 +636,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         Container(width: 10, height: 10,
             decoration: BoxDecoration(color: color, shape: BoxShape.circle)),
         const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 12, color: Colors.grey)),
+        Text(label, style: TextStyle(fontSize: 12, color: Theme.of(context).colorScheme.onSurfaceVariant)),
       ],
     );
   }

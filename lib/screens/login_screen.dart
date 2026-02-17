@@ -108,6 +108,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: AppTheme.cream,
       body: SafeArea(
@@ -146,7 +147,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   Text(
                     'Islamic Finance Tracker',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey[600],
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                   ),
                   const SizedBox(height: 48),
@@ -180,7 +181,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: theme.colorScheme.surface,
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
@@ -213,7 +214,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: theme.colorScheme.surface,
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -278,7 +279,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: () => Navigator.pushNamed(context, '/forgot-password'),
                     child: Text(
                       'Forgot Password?',
-                      style: TextStyle(color: Colors.grey[600]),
+                      style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                     ),
                   ),
 
@@ -290,7 +291,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: RichText(
                       text: TextSpan(
                         text: "Don't have an account? ",
-                        style: TextStyle(color: Colors.grey[600]),
+                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                         children: const [
                           TextSpan(
                             text: 'Sign Up',

@@ -91,6 +91,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final authService = context.watch<AuthService>();
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
 
@@ -455,25 +456,25 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         Container(
                           padding: const EdgeInsets.all(32),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: theme.cardColor,
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: Column(
                             children: [
                               Icon(Icons.account_balance_wallet_outlined,
-                                  size: 64, color: Colors.grey[300]),
+                                  size: 64, color: theme.dividerColor),
                               const SizedBox(height: 16),
                               Text(
                                 'No assets yet',
                                 style: TextStyle(
                                   fontSize: 18,
-                                  color: Colors.grey[600],
+                                  color: theme.colorScheme.onSurfaceVariant,
                                 ),
                               ),
                               const SizedBox(height: 8),
                               Text(
                                 'Add your first asset to start tracking',
-                                style: TextStyle(color: Colors.grey[400]),
+                                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                               ),
                               const SizedBox(height: 16),
                               ElevatedButton.icon(
@@ -544,12 +545,13 @@ class _QuickActionCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return GestureDetector(
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: theme.cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(

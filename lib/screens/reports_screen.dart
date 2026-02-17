@@ -392,6 +392,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: AppTheme.cream,
       appBar: AppBar(
@@ -441,7 +442,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
                 ..._reportTypes.map((r) => Container(
                   margin: const EdgeInsets.only(bottom: 12),
                   child: Material(
-                    color: Colors.white,
+                    color: theme.cardColor,
                     borderRadius: BorderRadius.circular(14),
                     child: InkWell(
                       borderRadius: BorderRadius.circular(14),
@@ -466,8 +467,8 @@ class _ReportsScreenState extends State<ReportsScreen> {
                                   Text(r['title'], style: const TextStyle(
                                     fontWeight: FontWeight.bold, fontSize: 16,
                                   )),
-                                  Text(r['desc'], style: const TextStyle(
-                                    color: Colors.grey, fontSize: 13,
+                                  Text(r['desc'], style: TextStyle(
+                                    color: theme.colorScheme.onSurfaceVariant, fontSize: 13,
                                   )),
                                 ],
                               ),

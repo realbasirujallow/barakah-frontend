@@ -110,6 +110,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
   }
 
   void _showAddAssetDialog() {
+    final theme = Theme.of(context);
     final nameController = TextEditingController();
     final valueController = TextEditingController();
     String selectedType = 'cash';
@@ -139,7 +140,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Colors.grey[300],
+                    color: theme.dividerColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -162,7 +163,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
                   prefixIcon: const Icon(Icons.label_outlined),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   filled: true,
-                  fillColor: Colors.grey[50],
+                  fillColor: theme.colorScheme.surfaceContainerLowest,
                 ),
               ),
               const SizedBox(height: 16),
@@ -173,7 +174,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
                   prefixIcon: const Icon(Icons.category_outlined),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   filled: true,
-                  fillColor: Colors.grey[50],
+                  fillColor: theme.colorScheme.surfaceContainerLowest,
                 ),
                 items: types.map((type) => DropdownMenuItem(
                   value: type,
@@ -193,7 +194,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
                   prefixIcon: const Icon(Icons.attach_money),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   filled: true,
-                  fillColor: Colors.grey[50],
+                  fillColor: theme.colorScheme.surfaceContainerLowest,
                 ),
               ),
               const SizedBox(height: 24),
@@ -263,6 +264,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
   Widget build(BuildContext context) {
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
     final totalValue = _assets.fold<double>(0, (sum, a) => sum + a.value);
+    final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: AppTheme.cream,
@@ -298,13 +300,13 @@ class _AssetsScreenState extends State<AssetsScreen> {
                               child: Column(
                                 children: [
                                   Icon(Icons.account_balance_wallet_outlined,
-                                      size: 80, color: Colors.grey[300]),
+                                      size: 80, color: theme.dividerColor),
                                   const SizedBox(height: 16),
                                   Text('No assets yet',
-                                      style: TextStyle(fontSize: 20, color: Colors.grey[600])),
+                                      style: TextStyle(fontSize: 20, color: theme.colorScheme.onSurfaceVariant)),
                                   const SizedBox(height: 8),
                                   Text('Tap + to add your first asset',
-                                      style: TextStyle(color: Colors.grey[400])),
+                                      style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
                                 ],
                               ),
                             ),

@@ -72,6 +72,7 @@ class _HalalScreenerScreenState extends State<HalalScreenerScreen>
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       appBar: AppBar(
         title: const Text('Halal Screener'),
@@ -99,6 +100,7 @@ class _HalalScreenerScreenState extends State<HalalScreenerScreen>
   }
 
   Widget _buildSearchTab() {
+    final theme = Theme.of(context);
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
@@ -137,7 +139,7 @@ class _HalalScreenerScreenState extends State<HalalScreenerScreen>
                   prefixIcon: const Icon(Icons.search),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: theme.colorScheme.surfaceContainerLowest,
                 ),
                 onSubmitted: _checkStock,
               ),
@@ -301,6 +303,7 @@ class _HalalScreenerScreenState extends State<HalalScreenerScreen>
   }
 
   Widget _buildListTab() {
+    final theme = Theme.of(context);
     if (_isLoadingList) {
       return const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen));
     }
@@ -349,7 +352,7 @@ class _HalalScreenerScreenState extends State<HalalScreenerScreen>
                       margin: const EdgeInsets.only(bottom: 6),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
-                        color: Colors.white,
+                        color: theme.cardColor,
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Row(
@@ -379,7 +382,7 @@ class _HalalScreenerScreenState extends State<HalalScreenerScreen>
                                 Text(stock['name'] ?? '',
                                     style: const TextStyle(fontWeight: FontWeight.w600)),
                                 Text(stock['reason'] ?? '',
-                                    style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                    style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant),
                                     maxLines: 1, overflow: TextOverflow.ellipsis),
                               ],
                             ),

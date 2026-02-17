@@ -58,6 +58,7 @@ class _ZakatScreenState extends State<ZakatScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
     final percentOfNisab = (_totalValue / _nisabThreshold).clamp(0.0, 1.0);
 
@@ -167,7 +168,7 @@ class _ZakatScreenState extends State<ZakatScreen> {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: theme.cardColor,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
@@ -194,7 +195,7 @@ class _ZakatScreenState extends State<ZakatScreen> {
                           child: LinearProgressIndicator(
                             value: percentOfNisab,
                             minHeight: 12,
-                            backgroundColor: Colors.grey[200],
+                            backgroundColor: theme.colorScheme.surfaceContainerHighest,
                             valueColor: AlwaysStoppedAnimation(
                               _zakatDue ? AppTheme.deepGreen : Colors.orange,
                             ),
@@ -220,7 +221,7 @@ class _ZakatScreenState extends State<ZakatScreen> {
                         const SizedBox(height: 4),
                         Text(
                           'Nisab Threshold: ${currencyFormat.format(_nisabThreshold)}',
-                          style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                          style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13),
                         ),
                       ],
                     ),
@@ -231,7 +232,7 @@ class _ZakatScreenState extends State<ZakatScreen> {
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: theme.cardColor,
                       borderRadius: BorderRadius.circular(16),
                       boxShadow: [
                         BoxShadow(
@@ -294,7 +295,7 @@ class _ZakatScreenState extends State<ZakatScreen> {
                                         ),
                                         Text(
                                           currencyFormat.format(entry.value),
-                                          style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                                          style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13),
                                         ),
                                       ],
                                     ),
@@ -347,7 +348,7 @@ class _ZakatScreenState extends State<ZakatScreen> {
                           '• Zakat is due when your wealth exceeds the Nisab for one lunar year\n'
                           '• Consult a scholar for specific rulings on your situation',
                           style: TextStyle(
-                            color: Colors.grey[700],
+                            color: theme.colorScheme.onSurfaceVariant,
                             height: 1.6,
                           ),
                         ),

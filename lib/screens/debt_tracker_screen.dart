@@ -260,6 +260,7 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
   @override
   Widget build(BuildContext context) {
     final fmt = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: AppTheme.cream,
@@ -327,9 +328,9 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
                       child: Column(
                         children: [
                           const SizedBox(height: 40),
-                          Icon(Icons.money_off, size: 64, color: Colors.grey.shade300),
+                          Icon(Icons.money_off, size: 64, color: theme.dividerColor),
                           const SizedBox(height: 16),
-                          Text('No debts tracked', style: TextStyle(fontSize: 18, color: Colors.grey.shade600)),
+                          Text('No debts tracked', style: TextStyle(fontSize: 18, color: theme.colorScheme.onSurfaceVariant)),
                           const SizedBox(height: 4),
                           Text('Alhamdulillah!', style: TextStyle(color: Colors.green.shade700, fontWeight: FontWeight.bold)),
                         ],
@@ -347,7 +348,7 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
                         margin: const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: theme.cardColor,
                           borderRadius: BorderRadius.circular(12),
                           border: !ribaFree ? Border.all(color: Colors.red.shade300) : null,
                         ),
@@ -398,16 +399,16 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
                             const SizedBox(height: 4),
                             Text(
                               _typeLabels[debt['type']] ?? debt['type'] as String? ?? '',
-                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                              style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13),
                             ),
                             if (debt['lender'] != null && (debt['lender'] as String).isNotEmpty)
-                              Text('Lender: ${debt['lender']}', style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                              Text('Lender: ${debt['lender']}', style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12)),
                             const SizedBox(height: 12),
                             ClipRRect(
                               borderRadius: BorderRadius.circular(4),
                               child: LinearProgressIndicator(
                                 value: (paidPct / 100).clamp(0, 1),
-                                backgroundColor: Colors.grey.shade200,
+                                backgroundColor: theme.colorScheme.surfaceContainerHighest,
                                 valueColor: AlwaysStoppedAnimation(
                                   status == 'paid_off' ? Colors.green : AppTheme.deepGreen,
                                 ),
@@ -419,7 +420,7 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
                               mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text('Remaining: ${fmt.format(remaining)}',
-                                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13)),
+                                    style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13)),
                                 Text('${paidPct.toStringAsFixed(0)}% paid',
                                     style: const TextStyle(fontWeight: FontWeight.bold)),
                               ],
@@ -457,6 +458,7 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -469,7 +471,7 @@ class _SummaryCard extends StatelessWidget {
         children: [
           Icon(icon, color: color, size: 24),
           const SizedBox(height: 8),
-          Text(title, style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+          Text(title, style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12)),
           const SizedBox(height: 2),
           Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: color)),
         ],

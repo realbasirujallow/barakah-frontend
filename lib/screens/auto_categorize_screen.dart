@@ -243,15 +243,16 @@ class _AutoCategorizeScreenState extends State<AutoCategorizeScreen> {
   }
 
   List<Widget> _buildTransactionList() {
+    final theme = Theme.of(context);
     final transactions = _review!['transactions'] as List<dynamic>? ?? [];
     if (transactions.isEmpty) {
       return [
         Center(
           child: Column(children: [
             const SizedBox(height: 40),
-            Icon(Icons.inbox, size: 64, color: Colors.grey.shade300),
+            Icon(Icons.inbox, size: 64, color: theme.colorScheme.onSurfaceVariant),
             const SizedBox(height: 16),
-            Text('No transactions to review', style: TextStyle(color: Colors.grey.shade600)),
+            Text('No transactions to review', style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
           ]),
         ),
       ];
@@ -277,7 +278,7 @@ class _AutoCategorizeScreenState extends State<AutoCategorizeScreen> {
         margin: const EdgeInsets.only(bottom: 6),
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: wouldChange ? Colors.blue.shade50 : Colors.white,
+          color: wouldChange ? Colors.blue.shade50 : theme.cardColor,
           borderRadius: BorderRadius.circular(10),
           border: wouldChange ? Border.all(color: Colors.blue.shade200) : null,
         ),
@@ -298,12 +299,12 @@ class _AutoCategorizeScreenState extends State<AutoCategorizeScreen> {
                       maxLines: 1, overflow: TextOverflow.ellipsis),
                   if (wouldChange)
                     Row(children: [
-                      Text(current, style: TextStyle(fontSize: 11, color: Colors.grey.shade500, decoration: TextDecoration.lineThrough)),
+                      Text(current, style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant, decoration: TextDecoration.lineThrough)),
                       const Icon(Icons.arrow_forward, size: 12, color: Colors.blue),
                       Text(suggested, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: color)),
                     ])
                   else
-                    Text(suggested, style: TextStyle(fontSize: 11, color: Colors.grey.shade600)),
+                    Text(suggested, style: TextStyle(fontSize: 11, color: theme.colorScheme.onSurfaceVariant)),
                 ],
               ),
             ),

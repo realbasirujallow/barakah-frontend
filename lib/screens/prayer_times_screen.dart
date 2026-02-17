@@ -176,6 +176,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final hijriStr = _hijriDate.isNotEmpty
         ? '${_hijriDate['day']} ${_hijriDate['month']} ${_hijriDate['year']} AH'
         : '';
@@ -255,7 +256,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                     margin: const EdgeInsets.only(bottom: 8),
                     padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     decoration: BoxDecoration(
-                      color: prayer.isNext ? AppTheme.deepGreen : Colors.white,
+                      color: prayer.isNext ? AppTheme.deepGreen : theme.cardColor,
                       borderRadius: BorderRadius.circular(14),
                       boxShadow: [
                         if (prayer.isNext)
@@ -278,7 +279,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
                                 style: TextStyle(
                                   fontWeight: FontWeight.w600,
                                   fontSize: 16,
-                                  color: prayer.isNext ? Colors.white : Colors.black87,
+                                  color: prayer.isNext ? Colors.white : theme.colorScheme.onSurface,
                                 ),
                               ),
                               if (prayer.isNext)

@@ -60,6 +60,7 @@ class _WaqfScreenState extends State<WaqfScreen> {
   }
 
   void _showAddWaqf() {
+    final theme = Theme.of(context);
     String selectedType = 'cash';
     String selectedPurpose = 'general';
     final orgCtrl = TextEditingController();
@@ -81,7 +82,7 @@ class _WaqfScreenState extends State<WaqfScreen> {
                 const Text('Add Waqf Contribution', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
                 const SizedBox(height: 4),
                 Text('"When a person dies, their deeds end except for three: Sadaqah Jariyah..." — Prophet Muhammad (PBUH)',
-                    style: TextStyle(color: Colors.grey.shade600, fontSize: 12, fontStyle: FontStyle.italic)),
+                    style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12, fontStyle: FontStyle.italic)),
                 const SizedBox(height: 16),
                 TextField(controller: orgCtrl,
                     decoration: const InputDecoration(labelText: 'Organization Name', border: OutlineInputBorder(), prefixIcon: Icon(Icons.business))),
@@ -162,6 +163,7 @@ class _WaqfScreenState extends State<WaqfScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     final fmt = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
     final dateFmt = DateFormat('MMM dd, yyyy');
 
@@ -240,11 +242,11 @@ class _WaqfScreenState extends State<WaqfScreen> {
                     Center(
                       child: Column(children: [
                         const SizedBox(height: 40),
-                        Icon(Icons.account_balance_outlined, size: 64, color: Colors.grey.shade300),
+                        Icon(Icons.account_balance_outlined, size: 64, color: theme.colorScheme.onSurfaceVariant),
                         const SizedBox(height: 16),
-                        Text('No waqf contributions yet', style: TextStyle(fontSize: 16, color: Colors.grey.shade600)),
+                        Text('No waqf contributions yet', style: TextStyle(fontSize: 16, color: theme.colorScheme.onSurfaceVariant)),
                         const SizedBox(height: 4),
-                        Text('Start your Sadaqah Jariyah', style: TextStyle(fontSize: 13, color: Colors.grey.shade500)),
+                        Text('Start your Sadaqah Jariyah', style: TextStyle(fontSize: 13, color: theme.colorScheme.onSurfaceVariant)),
                       ]),
                     )
                   else
@@ -258,7 +260,7 @@ class _WaqfScreenState extends State<WaqfScreen> {
                         margin: const EdgeInsets.only(bottom: 8),
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: Colors.white,
+                          color: theme.cardColor,
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Row(
@@ -286,10 +288,10 @@ class _WaqfScreenState extends State<WaqfScreen> {
                                     ),
                                     const SizedBox(width: 6),
                                     Text(contrib['type'] as String? ?? '',
-                                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600)),
+                                        style: TextStyle(fontSize: 12, color: theme.colorScheme.onSurfaceVariant)),
                                   ]),
                                   Text(dateFmt.format(DateTime.fromMillisecondsSinceEpoch(date)),
-                                      style: TextStyle(color: Colors.grey.shade500, fontSize: 12)),
+                                      style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12)),
                                 ],
                               ),
                             ),

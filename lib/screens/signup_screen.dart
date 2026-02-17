@@ -88,6 +88,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
     return Scaffold(
       backgroundColor: AppTheme.cream,
       body: SafeArea(
@@ -126,7 +127,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   Text(
                     'Start your halal finance journey',
                     style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                          color: Colors.grey[600],
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
                   ),
                   const SizedBox(height: 40),
@@ -160,7 +161,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: theme.colorScheme.surface,
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
@@ -182,7 +183,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: theme.colorScheme.surface,
                     ),
                     validator: (value) {
                       if (value == null || value.trim().isEmpty) {
@@ -215,7 +216,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: theme.colorScheme.surface,
                     ),
                     validator: (value) {
                       if (value == null || value.isEmpty) {
@@ -248,7 +249,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         borderRadius: BorderRadius.circular(12),
                       ),
                       filled: true,
-                      fillColor: Colors.white,
+                      fillColor: theme.colorScheme.surface,
                     ),
                     validator: (value) {
                       if (value != _passwordController.text) {
@@ -298,7 +299,7 @@ class _SignupScreenState extends State<SignupScreen> {
                     child: RichText(
                       text: TextSpan(
                         text: 'Already have an account? ',
-                        style: TextStyle(color: Colors.grey[600]),
+                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
                         children: const [
                           TextSpan(
                             text: 'Login',

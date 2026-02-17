@@ -179,6 +179,7 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
   @override
   Widget build(BuildContext context) {
     final fmt = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+    final theme = Theme.of(context);
 
     return Scaffold(
       backgroundColor: AppTheme.cream,
@@ -207,20 +208,20 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
                   margin: const EdgeInsets.all(16),
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: theme.cardColor,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
                       Column(children: [
-                        Text('Monthly Bills', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                        Text('Monthly Bills', style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12)),
                         const SizedBox(height: 4),
                         Text(fmt.format(_totalMonthly), style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
                       ]),
-                      Container(width: 1, height: 40, color: Colors.grey.shade200),
+                      Container(width: 1, height: 40, color: theme.dividerColor),
                       Column(children: [
-                        Text('Overdue', style: TextStyle(color: Colors.grey.shade600, fontSize: 12)),
+                        Text('Overdue', style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12)),
                         const SizedBox(height: 4),
                         Text('$_overdueCount', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: _overdueCount > 0 ? Colors.red : Colors.green)),
                       ]),
@@ -248,16 +249,17 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
   }
 
   Widget _buildBillList(String tab, NumberFormat fmt) {
+    final theme = Theme.of(context);
     final bills = _filterBills(tab);
     if (bills.isEmpty) {
       return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.receipt_long, size: 64, color: Colors.grey.shade300),
+            Icon(Icons.receipt_long, size: 64, color: theme.dividerColor),
             const SizedBox(height: 16),
             Text(tab == 'paid' ? 'No paid bills' : 'No ${tab} bills',
-                style: TextStyle(fontSize: 16, color: Colors.grey.shade600)),
+                style: TextStyle(fontSize: 16, color: theme.colorScheme.onSurfaceVariant)),
           ],
         ),
       );
@@ -279,7 +281,7 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
             margin: const EdgeInsets.only(bottom: 10),
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: theme.cardColor,
               borderRadius: BorderRadius.circular(12),
               border: overdue ? Border.all(color: Colors.red, width: 1.5) : null,
             ),
@@ -298,7 +300,7 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
                       Text(bill['name'] as String? ?? '', style: const TextStyle(fontWeight: FontWeight.bold)),
                       Text(
                         '${fmt.format(bill['amount'])} • ${bill['frequency']}',
-                        style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                        style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13),
                       ),
                       if (!paid)
                         Text(
