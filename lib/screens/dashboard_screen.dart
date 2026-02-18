@@ -442,6 +442,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           ),
                         ],
                       ),
+                      const SizedBox(height: 12),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _QuickActionCard(
+                              icon: Icons.trending_up,
+                              label: 'Investments',
+                              onTap: () => Navigator.pushNamed(context, '/investments'),
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          const Expanded(child: SizedBox()),
+                          const SizedBox(width: 12),
+                          const Expanded(child: SizedBox()),
+                        ],
+                      ),
                       const SizedBox(height: 24),
 
                       // Recent Assets

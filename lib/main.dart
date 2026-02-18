@@ -29,6 +29,7 @@ import 'package:barakah_app/screens/riba_detector_screen.dart';
 import 'package:barakah_app/screens/auto_categorize_screen.dart';
 import 'package:barakah_app/screens/net_worth_screen.dart';
 import 'package:barakah_app/screens/shared_finances_screen.dart';
+import 'package:barakah_app/screens/investments_screen.dart';
 import 'package:barakah_app/services/notification_service.dart';
 
 void main() async {
@@ -93,6 +94,7 @@ class BarakahApp extends StatelessWidget {
               '/auto-categorize': (context) => const AutoCategorizeScreen(),
               '/net-worth': (context) => const NetWorthScreen(),
               '/shared-finances': (context) => const SharedFinancesScreen(),
+              '/investments': (context) => const InvestmentsScreen(),
             },
           );
         },

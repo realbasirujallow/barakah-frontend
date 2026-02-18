@@ -671,4 +671,63 @@ class ApiService {
     final response = await _dio.delete('/api/shared/groups/$groupId/members/$memberId');
     return response.data as Map<String, dynamic>;
   }
+
+  // ─── Investment Accounts ────────────────────────────
+
+  Future<Map<String, dynamic>> addInvestmentAccount(Map<String, dynamic> data) async {
+    final response = await _dio.post('/api/investments/accounts/add', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getInvestmentAccounts({String? type}) async {
+    final params = <String, dynamic>{};
+    if (type != null) params['type'] = type;
+    final response = await _dio.get('/api/investments/accounts/list', queryParameters: params);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getInvestmentAccount(int id) async {
+    final response = await _dio.get('/api/investments/accounts/$id');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> updateInvestmentAccount(int id, Map<String, dynamic> data) async {
+    final response = await _dio.put('/api/investments/accounts/$id', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> deleteInvestmentAccount(int id) async {
+    final response = await _dio.delete('/api/investments/accounts/$id');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> addInvestmentHolding(int accountId, Map<String, dynamic> data) async {
+    final response = await _dio.post('/api/investments/accounts/$accountId/holdings/add', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getInvestmentHoldings(int accountId) async {
+    final response = await _dio.get('/api/investments/accounts/$accountId/holdings');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> updateInvestmentHolding(int id, Map<String, dynamic> data) async {
+    final response = await _dio.put('/api/investments/holdings/$id', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> updateHoldingPrice(int id, double price) async {
+    final response = await _dio.put('/api/investments/holdings/$id/price', data: {'currentPrice': price});
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> deleteInvestmentHolding(int id) async {
+    final response = await _dio.delete('/api/investments/holdings/$id');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getPortfolioSummary() async {
+    final response = await _dio.get('/api/investments/portfolio/summary');
+    return response.data as Map<String, dynamic>;
+  }
 }
