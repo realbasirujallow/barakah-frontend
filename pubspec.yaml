@@ -49,6 +49,8 @@ dependencies:
   path_provider: ^2.1.5
   share_plus: ^10.1.4
   timezone: ^0.10.1
+  geolocator: ^14.0.2
+  geocoding: ^4.0.0
 
 dev_dependencies:
   flutter_test:

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:provider/provider.dart';
-import 'services/auth_service.dart';
-import 'services/api_service.dart';
+import 'package:barakah_app/services/auth_service.dart';
+import 'package:barakah_app/services/api_service.dart';
 
 class CreditScoreScreen extends StatefulWidget {
   const CreditScoreScreen({super.key});

@@ -30,7 +30,7 @@ import 'package:barakah_app/screens/auto_categorize_screen.dart';
 import 'package:barakah_app/screens/net_worth_screen.dart';
 import 'package:barakah_app/screens/shared_finances_screen.dart';
 import 'package:barakah_app/screens/investments_screen.dart';
-import 'package:barakah_app/credit_score_screen.dart';
+import 'package:barakah_app/screens/credit_score_screen.dart';
 import 'package:barakah_app/services/notification_service.dart';
 
 void main() async {

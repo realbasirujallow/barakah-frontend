@@ -15,13 +15,15 @@ class ZakatScreen extends StatefulWidget {
 
 class _ZakatScreenState extends State<ZakatScreen> {
   static const double _nisabThreshold = 5686.20;
-  // Zakat rate: 2.5% of total eligible wealth
 
   List<Asset> _assets = [];
   double _totalValue = 0;
+  double _zakatableWealth = 0;
+  double _nonZakatableWealth = 0;
   double _zakatAmount = 0;
   bool _zakatDue = false;
   bool _isLoading = true;
+  List<dynamic> _breakdown = [];
 
   @override
   void initState() {
@@ -47,8 +49,11 @@ class _ZakatScreenState extends State<ZakatScreen> {
       setState(() {
         _assets = assets;
         _totalValue = (totals['totalWealth'] as num?)?.toDouble() ?? 0;
+        _zakatableWealth = (totals['zakatableWealth'] as num?)?.toDouble() ?? 0;
+        _nonZakatableWealth = (totals['nonZakatableWealth'] as num?)?.toDouble() ?? 0;
         _zakatAmount = (totals['zakatDue'] as num?)?.toDouble() ?? 0;
         _zakatDue = totals['zakatEligible'] as bool? ?? false;
+        _breakdown = totals['breakdown'] as List<dynamic>? ?? [];
         _isLoading = false;
       });
     } catch (e) {
@@ -60,13 +65,7 @@ class _ZakatScreenState extends State<ZakatScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
-    final percentOfNisab = (_totalValue / _nisabThreshold).clamp(0.0, 1.0);
-
-    // Group assets by type
-    final assetsByType = <String, double>{};
-    for (final asset in _assets) {
-      assetsByType[asset.type] = (assetsByType[asset.type] ?? 0) + asset.value;
-    }
+    final percentOfNisab = (_zakatableWealth / _nisabThreshold).clamp(0.0, 1.0);
 
     return Scaffold(
       backgroundColor: AppTheme.cream,
@@ -124,8 +123,8 @@ class _ZakatScreenState extends State<ZakatScreen> {
                         const SizedBox(height: 8),
                         Text(
                           _zakatDue
-                              ? 'Your wealth has reached the nisab. May Allah bless your generosity.'
-                              : 'Your wealth has not yet reached the nisab threshold.',
+                              ? 'Your eligible wealth has reached the nisab. May Allah bless your generosity.'
+                              : 'Your zakatable wealth has not yet reached the nisab threshold.',
                           textAlign: TextAlign.center,
                           style: TextStyle(
                             color: Colors.white.withAlpha(180),
@@ -143,7 +142,7 @@ class _ZakatScreenState extends State<ZakatScreen> {
                             child: Column(
                               children: [
                                 const Text(
-                                  'Zakat Amount',
+                                  'Zakat Amount (2.5%)',
                                   style: TextStyle(color: Colors.white70, fontSize: 13),
                                 ),
                                 const SizedBox(height: 4),
@@ -164,6 +163,41 @@ class _ZakatScreenState extends State<ZakatScreen> {
                   ),
                   const SizedBox(height: 24),
 
+                  // Wealth Summary Cards
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildSummaryCard(
+                          'Total Wealth',
+                          currencyFormat.format(_totalValue),
+                          Icons.account_balance_wallet,
+                          Colors.blue,
+                          theme,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildSummaryCard(
+                          'Zakatable',
+                          currencyFormat.format(_zakatableWealth),
+                          Icons.check_circle,
+                          AppTheme.deepGreen,
+                          theme,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  if (_nonZakatableWealth > 0)
+                    _buildSummaryCard(
+                      'Exempt from Zakat',
+                      currencyFormat.format(_nonZakatableWealth),
+                      Icons.block,
+                      Colors.orange,
+                      theme,
+                    ),
+                  const SizedBox(height: 24),
+
                   // Nisab Progress
                   Container(
                     padding: const EdgeInsets.all(20),
@@ -182,7 +216,7 @@ class _ZakatScreenState extends State<ZakatScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Nisab Progress',
+                          'Nisab Progress (Zakatable Wealth)',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -206,7 +240,7 @@ class _ZakatScreenState extends State<ZakatScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              'Your Wealth: ${currencyFormat.format(_totalValue)}',
+                              'Zakatable: ${currencyFormat.format(_zakatableWealth)}',
                               style: const TextStyle(fontWeight: FontWeight.w500),
                             ),
                             Text(
@@ -228,7 +262,8 @@ class _ZakatScreenState extends State<ZakatScreen> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Breakdown by Type
+                  // Detailed Breakdown
+                  if (_breakdown.isNotEmpty)
                   Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -246,7 +281,7 @@ class _ZakatScreenState extends State<ZakatScreen> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         const Text(
-                          'Wealth Breakdown',
+                          'Zakat Breakdown by Asset',
                           style: TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
@@ -254,63 +289,102 @@ class _ZakatScreenState extends State<ZakatScreen> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        if (assetsByType.isEmpty)
-                          const Center(
-                            child: Padding(
-                              padding: EdgeInsets.all(16),
-                              child: Text('No assets to display'),
+                        ..._breakdown.map((item) {
+                          final bool isZakatable = item['zakatable'] == true;
+                          final double value = (item['value'] as num).toDouble();
+                          final double zakatableValue = (item['zakatableValue'] as num).toDouble();
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 10),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: isZakatable
+                                  ? AppTheme.deepGreen.withAlpha(15)
+                                  : Colors.orange.withAlpha(15),
+                              borderRadius: BorderRadius.circular(12),
+                              border: Border.all(
+                                color: isZakatable
+                                    ? AppTheme.deepGreen.withAlpha(50)
+                                    : Colors.orange.withAlpha(50),
+                              ),
                             ),
-                          )
-                        else
-                          ...assetsByType.entries.map((entry) {
-                            final percentage = _totalValue > 0
-                                ? (entry.value / _totalValue * 100)
-                                : 0.0;
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    decoration: BoxDecoration(
-                                      color: AppTheme.deepGreen.withAlpha(25),
-                                      borderRadius: BorderRadius.circular(10),
-                                    ),
-                                    child: Center(
-                                      child: Text(
-                                        _typeIcon(entry.key),
-                                        style: const TextStyle(fontSize: 20),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Container(
+                                      width: 36,
+                                      height: 36,
+                                      decoration: BoxDecoration(
+                                        color: isZakatable
+                                            ? AppTheme.deepGreen.withAlpha(30)
+                                            : Colors.orange.withAlpha(30),
+                                        borderRadius: BorderRadius.circular(10),
+                                      ),
+                                      child: Center(
+                                        child: Text(
+                                          _typeIcon(item['type'] ?? ''),
+                                          style: const TextStyle(fontSize: 18),
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(
+                                            item['name'] ?? '',
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                          ),
+                                          Text(
+                                            (item['type'] ?? '').toString().replaceAll('_', ' ').toUpperCase(),
+                                            style: TextStyle(
+                                              color: theme.colorScheme.onSurfaceVariant,
+                                              fontSize: 11,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
                                       children: [
                                         Text(
-                                          entry.key.replaceAll('_', ' ').toUpperCase(),
+                                          currencyFormat.format(value),
                                           style: const TextStyle(fontWeight: FontWeight.w600),
                                         ),
                                         Text(
-                                          currencyFormat.format(entry.value),
-                                          style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 13),
+                                          isZakatable
+                                              ? (zakatableValue == value
+                                                  ? '✓ Fully zakatable'
+                                                  : '✓ ${currencyFormat.format(zakatableValue)} zakatable')
+                                              : '✗ Exempt',
+                                          style: TextStyle(
+                                            fontSize: 11,
+                                            fontWeight: FontWeight.w600,
+                                            color: isZakatable ? AppTheme.deepGreen : Colors.orange,
+                                          ),
                                         ),
                                       ],
                                     ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                Text(
+                                  item['reason'] ?? '',
+                                  style: TextStyle(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                    fontSize: 11,
+                                    fontStyle: FontStyle.italic,
                                   ),
-                                  Text(
-                                    '${percentage.toStringAsFixed(1)}%',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: AppTheme.deepGreen,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
                       ],
                     ),
                   ),
@@ -343,9 +417,12 @@ class _ZakatScreenState extends State<ZakatScreen> {
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          '• Zakat is 2.5% of your total eligible wealth\n'
+                          '• Zakat is 2.5% of your eligible (zakatable) wealth\n'
                           '• The Nisab threshold is approximately \$5,686.20 (85g of gold)\n'
-                          '• Zakat is due when your wealth exceeds the Nisab for one lunar year\n'
+                          '• Personal residence, vehicles & belongings are NOT zakatable\n'
+                          '• Retirement accounts (401k/IRA) are adjusted for early withdrawal penalties & taxes\n'
+                          '• Cash, gold, silver, stocks, crypto, and business assets ARE zakatable\n'
+                          '• Zakat is due when zakatable wealth exceeds Nisab for one lunar year\n'
                           '• Consult a scholar for specific rulings on your situation',
                           style: TextStyle(
                             color: theme.colorScheme.onSurfaceVariant,
@@ -361,6 +438,33 @@ class _ZakatScreenState extends State<ZakatScreen> {
     );
   }
 
+  Widget _buildSummaryCard(String label, String value, IconData icon, Color color, ThemeData theme) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(color: Colors.black.withAlpha(13), blurRadius: 8, offset: const Offset(0, 2)),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(icon, color: color, size: 20),
+              const SizedBox(width: 6),
+              Text(label, style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 12)),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(value, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: color)),
+        ],
+      ),
+    );
+  }
+
   String _typeIcon(String type) {
     switch (type.toLowerCase()) {
       case 'crypto':
@@ -372,7 +476,25 @@ class _ZakatScreenState extends State<ZakatScreen> {
       case 'cash':
         return '💵';
       case 'real_estate':
+      case 'property':
+      case 'house':
+      case 'home':
+      case 'residence':
         return '🏠';
+      case 'vehicle':
+      case 'car':
+        return '🚗';
+      case '401k':
+      case 'retirement_401k':
+      case 'ira':
+      case 'roth_ira':
+      case 'pension':
+      case 'retirement':
+        return '🏦';
+      case 'silver':
+        return '🥈';
+      case 'business':
+        return '🏪';
       default:
         return '💰';
     }

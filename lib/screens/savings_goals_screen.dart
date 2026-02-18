@@ -27,7 +27,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
     {'key': 'home', 'label': 'Home', 'icon': Icons.home},
     {'key': 'vehicle', 'label': 'Vehicle', 'icon': Icons.directions_car},
     {'key': 'charity', 'label': 'Charity / Sadaqah', 'icon': Icons.volunteer_activism},
-    {'key': 'other', 'label': 'Other', 'icon': Icons.savings},
+    {'key': 'other', 'label': 'Other', 'icon': Icons.flag},
   ];
 
   @override
@@ -55,7 +55,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
   IconData _categoryIcon(String category) {
     final cat = _categories.firstWhere(
       (c) => c['key'] == category,
-      orElse: () => {'icon': Icons.savings},
+      orElse: () => {'icon': Icons.flag},
     );
     return cat['icon'] as IconData;
   }
@@ -276,7 +276,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
                       child: Column(
                         children: [
                           const SizedBox(height: 40),
-                          Icon(Icons.savings, size: 64, color: theme.dividerColor),
+                          Icon(Icons.flag, size: 64, color: theme.dividerColor),
                           const SizedBox(height: 16),
                           Text('No savings goals yet', style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 16)),
                           const SizedBox(height: 8),

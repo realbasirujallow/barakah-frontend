@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/services/cache_service.dart';
@@ -24,11 +25,102 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _zakatDue = false;
   bool _isLoading = true;
   String? _error;
+  bool _isEditingGrid = false;
+
+  // Default quick action order
+  static const List<Map<String, dynamic>> _defaultActions = [
+    {'icon': 'account_balance_wallet', 'label': 'Assets', 'route': '/assets'},
+    {'icon': 'calculate', 'label': 'Zakat', 'route': '/zakat'},
+    {'icon': 'trending_up', 'label': 'Prices', 'route': '/prices'},
+    {'icon': 'receipt_long', 'label': 'Transactions', 'route': '/transactions'},
+    {'icon': 'mosque', 'label': 'Prayers', 'route': '/prayers'},
+    {'icon': 'picture_as_pdf', 'label': 'Reports', 'route': '/reports'},
+    {'icon': 'verified', 'label': 'Halal', 'route': '/halal'},
+    {'icon': 'bar_chart', 'label': 'Analytics', 'route': '/analytics'},
+    {'icon': 'settings', 'label': 'Settings', 'route': '/settings'},
+    {'icon': 'flag', 'label': 'Goals', 'route': '/savings'},
+    {'icon': 'pie_chart', 'label': 'Budget', 'route': '/budget'},
+    {'icon': 'credit_card_off', 'label': 'Debts', 'route': '/debts'},
+    {'icon': 'notifications_active', 'label': 'Bills', 'route': '/bills'},
+    {'icon': 'access_time', 'label': 'Hawl', 'route': '/hawl'},
+    {'icon': 'volunteer_activism', 'label': 'Sadaqah', 'route': '/sadaqah'},
+    {'icon': 'description', 'label': 'Wasiyyah', 'route': '/wasiyyah'},
+    {'icon': 'account_balance', 'label': 'Waqf', 'route': '/waqf'},
+    {'icon': 'shield', 'label': 'Riba Check', 'route': '/riba'},
+    {'icon': 'auto_fix_high', 'label': 'Auto-Cat', 'route': '/auto-categorize'},
+    {'icon': 'show_chart', 'label': 'Net Worth', 'route': '/net-worth'},
+    {'icon': 'family_restroom', 'label': 'Shared', 'route': '/shared-finances'},
+    {'icon': 'trending_up_2', 'label': 'Investments', 'route': '/investments'},
+    {'icon': 'speed', 'label': 'Credit Score', 'route': '/credit-score'},
+  ];
+
+  List<Map<String, dynamic>> _quickActions = [];
+
+  static IconData _getIcon(String name) {
+    switch (name) {
+      case 'account_balance_wallet': return Icons.account_balance_wallet;
+      case 'calculate': return Icons.calculate;
+      case 'trending_up': return Icons.trending_up;
+      case 'receipt_long': return Icons.receipt_long;
+      case 'mosque': return Icons.mosque;
+      case 'picture_as_pdf': return Icons.picture_as_pdf;
+      case 'verified': return Icons.verified;
+      case 'bar_chart': return Icons.bar_chart;
+      case 'settings': return Icons.settings;
+      case 'flag': return Icons.flag;
+      case 'pie_chart': return Icons.pie_chart;
+      case 'credit_card_off': return Icons.credit_card_off;
+      case 'notifications_active': return Icons.notifications_active;
+      case 'access_time': return Icons.access_time;
+      case 'volunteer_activism': return Icons.volunteer_activism;
+      case 'description': return Icons.description;
+      case 'account_balance': return Icons.account_balance;
+      case 'shield': return Icons.shield;
+      case 'auto_fix_high': return Icons.auto_fix_high;
+      case 'show_chart': return Icons.show_chart;
+      case 'family_restroom': return Icons.family_restroom;
+      case 'trending_up_2': return Icons.trending_up;
+      case 'speed': return Icons.speed;
+      default: return Icons.apps;
+    }
+  }
 
   @override
   void initState() {
     super.initState();
+    _loadQuickActionOrder();
     _loadData();
+  }
+
+  Future<void> _loadQuickActionOrder() async {
+    final prefs = await SharedPreferences.getInstance();
+    final savedOrder = prefs.getStringList('quick_action_order');
+    if (savedOrder != null && savedOrder.isNotEmpty) {
+      // Rebuild list in saved order, then append any new actions not in saved order
+      final ordered = <Map<String, dynamic>>[];
+      for (final route in savedOrder) {
+        final action = _defaultActions.firstWhere(
+          (a) => a['route'] == route,
+          orElse: () => <String, dynamic>{},
+        );
+        if (action.isNotEmpty) ordered.add(action);
+      }
+      // Add any new actions that weren't in saved order
+      for (final action in _defaultActions) {
+        if (!ordered.any((a) => a['route'] == action['route'])) {
+          ordered.add(action);
+        }
+      }
+      setState(() => _quickActions = ordered);
+    } else {
+      setState(() => _quickActions = List.from(_defaultActions));
+    }
+  }
+
+  Future<void> _saveQuickActionOrder() async {
+    final prefs = await SharedPreferences.getInstance();
+    final order = _quickActions.map((a) => a['route'] as String).toList();
+    await prefs.setStringList('quick_action_order', order);
   }
 
   Future<void> _loadData() async {
@@ -246,224 +338,43 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // Quick Actions
+                      // Quick Actions Header
                       Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.account_balance_wallet,
-                              label: 'Assets',
-                              onTap: () => Navigator.pushNamed(context, '/assets'),
+                          const Text(
+                            'Quick Actions',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: AppTheme.deepGreen,
                             ),
                           ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.calculate,
-                              label: 'Zakat',
-                              onTap: () => Navigator.pushNamed(context, '/zakat'),
+                          TextButton.icon(
+                            icon: Icon(
+                              _isEditingGrid ? Icons.check : Icons.swap_vert,
+                              size: 18,
+                              color: AppTheme.deepGreen,
                             ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.trending_up,
-                              label: 'Prices',
-                              onTap: () => Navigator.pushNamed(context, '/prices'),
+                            label: Text(
+                              _isEditingGrid ? 'Done' : 'Reorder',
+                              style: const TextStyle(color: AppTheme.deepGreen, fontSize: 13),
                             ),
+                            onPressed: () {
+                              setState(() => _isEditingGrid = !_isEditingGrid);
+                              if (!_isEditingGrid) _saveQuickActionOrder();
+                            },
                           ),
                         ],
                       ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.receipt_long,
-                              label: 'Transactions',
-                              onTap: () => Navigator.pushNamed(context, '/transactions'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.mosque,
-                              label: 'Prayers',
-                              onTap: () => Navigator.pushNamed(context, '/prayers'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.picture_as_pdf,
-                              label: 'Reports',
-                              onTap: () => Navigator.pushNamed(context, '/reports'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.verified,
-                              label: 'Halal',
-                              onTap: () => Navigator.pushNamed(context, '/halal'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.bar_chart,
-                              label: 'Analytics',
-                              onTap: () => Navigator.pushNamed(context, '/analytics'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.settings,
-                              label: 'Settings',
-                              onTap: () => Navigator.pushNamed(context, '/settings'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.savings,
-                              label: 'Goals',
-                              onTap: () => Navigator.pushNamed(context, '/savings'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.pie_chart,
-                              label: 'Budget',
-                              onTap: () => Navigator.pushNamed(context, '/budget'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.credit_card_off,
-                              label: 'Debts',
-                              onTap: () => Navigator.pushNamed(context, '/debts'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.notifications_active,
-                              label: 'Bills',
-                              onTap: () => Navigator.pushNamed(context, '/bills'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.access_time,
-                              label: 'Hawl',
-                              onTap: () => Navigator.pushNamed(context, '/hawl'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.volunteer_activism,
-                              label: 'Sadaqah',
-                              onTap: () => Navigator.pushNamed(context, '/sadaqah'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.description,
-                              label: 'Wasiyyah',
-                              onTap: () => Navigator.pushNamed(context, '/wasiyyah'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.account_balance,
-                              label: 'Waqf',
-                              onTap: () => Navigator.pushNamed(context, '/waqf'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.shield,
-                              label: 'Riba Check',
-                              onTap: () => Navigator.pushNamed(context, '/riba'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.auto_fix_high,
-                              label: 'Auto-Cat',
-                              onTap: () => Navigator.pushNamed(context, '/auto-categorize'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.show_chart,
-                              label: 'Net Worth',
-                              onTap: () => Navigator.pushNamed(context, '/net-worth'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.family_restroom,
-                              label: 'Shared',
-                              onTap: () => Navigator.pushNamed(context, '/shared-finances'),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 12),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.trending_up,
-                              label: 'Investments',
-                              onTap: () => Navigator.pushNamed(context, '/investments'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: _QuickActionCard(
-                              icon: Icons.speed,
-                              label: 'Credit Score',
-                              onTap: () => Navigator.pushNamed(context, '/credit-score'),
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          const Expanded(child: SizedBox()),
-                        ],
-                      ),
+                      const SizedBox(height: 8),
+
+                      // Dynamic Quick Actions Grid
+                      if (_isEditingGrid)
+                        _buildReorderableGrid()
+                      else
+                        _buildQuickActionsGrid(),
+
                       const SizedBox(height: 24),
 
                       // Recent Assets
@@ -562,6 +473,74 @@ class _DashboardScreenState extends State<DashboardScreen> {
           BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
         ],
       ),
+    );
+  }
+
+  Widget _buildQuickActionsGrid() {
+    final rows = <Widget>[];
+    for (var i = 0; i < _quickActions.length; i += 3) {
+      final rowChildren = <Widget>[];
+      for (var j = i; j < i + 3; j++) {
+        if (j < _quickActions.length) {
+          final action = _quickActions[j];
+          if (j > i) rowChildren.add(const SizedBox(width: 12));
+          rowChildren.add(
+            Expanded(
+              child: _QuickActionCard(
+                icon: _getIcon(action['icon'] as String),
+                label: action['label'] as String,
+                onTap: () => Navigator.pushNamed(context, action['route'] as String),
+              ),
+            ),
+          );
+        } else {
+          if (j > i) rowChildren.add(const SizedBox(width: 12));
+          rowChildren.add(const Expanded(child: SizedBox()));
+        }
+      }
+      if (i > 0) rows.add(const SizedBox(height: 12));
+      rows.add(Row(children: rowChildren));
+    }
+    return Column(children: rows);
+  }
+
+  Widget _buildReorderableGrid() {
+    return ReorderableListView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: _quickActions.length,
+      onReorder: (oldIndex, newIndex) {
+        setState(() {
+          if (newIndex > oldIndex) newIndex--;
+          final item = _quickActions.removeAt(oldIndex);
+          _quickActions.insert(newIndex, item);
+        });
+      },
+      proxyDecorator: (child, index, animation) {
+        return Material(
+          elevation: 4,
+          borderRadius: BorderRadius.circular(14),
+          child: child,
+        );
+      },
+      itemBuilder: (context, index) {
+        final action = _quickActions[index];
+        return Container(
+          key: ValueKey(action['route']),
+          margin: const EdgeInsets.only(bottom: 6),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.grey.withAlpha(50)),
+          ),
+          child: ListTile(
+            leading: Icon(_getIcon(action['icon'] as String), color: AppTheme.deepGreen),
+            title: Text(action['label'] as String, style: const TextStyle(fontWeight: FontWeight.w500)),
+            trailing: const Icon(Icons.drag_handle, color: Colors.grey),
+            dense: true,
+          ),
+        );
+      },
     );
   }
 }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:barakah_app/services/prayer_times_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 
 class PrayerTimesScreen extends StatefulWidget {
   const PrayerTimesScreen({super.key});
@@ -40,7 +42,65 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
   @override
   void initState() {
     super.initState();
-    _loadPrayerTimes();
+    _detectLocationAndLoad();
+  }
+
+  Future<void> _detectLocationAndLoad() async {
+    setState(() => _isLoading = true);
+    try {
+      // Check if location services are enabled
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        // Fall back to default
+        _loadPrayerTimes();
+        return;
+      }
+
+      // Check permissions
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied ||
+            permission == LocationPermission.deniedForever) {
+          _loadPrayerTimes();
+          return;
+        }
+      }
+
+      // Get current position
+      Position position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.low,
+          timeLimit: Duration(seconds: 10),
+        ),
+      );
+
+      _latitude = position.latitude;
+      _longitude = position.longitude;
+
+      // Try to get city name via reverse geocoding
+      try {
+        List<Placemark> placemarks = await placemarkFromCoordinates(
+          position.latitude,
+          position.longitude,
+        );
+        if (placemarks.isNotEmpty) {
+          final place = placemarks.first;
+          _locationName = [
+            place.locality ?? place.subAdministrativeArea,
+            place.country,
+          ].where((s) => s != null && s.isNotEmpty).join(', ');
+          if (_locationName.isEmpty) _locationName = 'Current Location';
+        }
+      } catch (_) {
+        _locationName = 'Current Location';
+      }
+
+      _loadPrayerTimes();
+    } catch (e) {
+      // GPS failed, use default
+      _loadPrayerTimes();
+    }
   }
 
   Future<void> _loadPrayerTimes() async {
@@ -97,6 +157,23 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
           children: [
             const Text('Set Location',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.deepGreen)),
+            const SizedBox(height: 16),
+            // GPS auto-detect button
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton.icon(
+                icon: const Icon(Icons.my_location, color: AppTheme.deepGreen),
+                label: const Text('Use My Current Location'),
+                onPressed: () {
+                  Navigator.pop(ctx);
+                  _detectLocationAndLoad();
+                },
+                style: OutlinedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  side: const BorderSide(color: AppTheme.deepGreen),
+                ),
+              ),
+            ),
             const SizedBox(height: 16),
             Wrap(
               spacing: 8,
