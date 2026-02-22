@@ -262,6 +262,7 @@ function AssetsTab({ assets, onRefresh }) {
               <option value="investment">Investment</option>
               <option value="business">Business</option>
               <option value="529">529 Plan</option>
+              <option value="individual_brokerage">Individual Brokerage Account</option>
             </select>
             <input
               type="number"
