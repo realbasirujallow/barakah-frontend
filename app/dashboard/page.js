@@ -261,6 +261,7 @@ function AssetsTab({ assets, onRefresh }) {
               <option value="property">Property</option>
               <option value="investment">Investment</option>
               <option value="business">Business</option>
+              <option value="529">529 Plan</option>
             </select>
             <input
               type="number"
