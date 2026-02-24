@@ -178,7 +178,7 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
                   title: const Text('Halal Compliant'),
                   subtitle: const Text('Is this account shariah-compliant?'),
                   value: isHalal,
-                  activeColor: AppTheme.deepGreen,
+                  activeThumbColor: AppTheme.deepGreen,
                   onChanged: (v) => setSheetState(() => isHalal = v),
                   contentPadding: EdgeInsets.zero,
                 ),
@@ -639,7 +639,7 @@ class _AccountDetailScreenState extends State<_AccountDetailScreen> {
                 SwitchListTile(
                   title: const Text('Halal Compliant'),
                   value: isHalal,
-                  activeColor: AppTheme.deepGreen,
+                  activeThumbColor: AppTheme.deepGreen,
                   onChanged: (v) => setSheetState(() => isHalal = v),
                   contentPadding: EdgeInsets.zero,
                 ),

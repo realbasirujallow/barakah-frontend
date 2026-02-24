@@ -124,7 +124,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
       '🚗 Other': ['vehicle', 'other'],
     };
 
-    String _displayName(String type) {
+    String displayName(String type) {
       const labels = {
         'cash': 'Cash',
         'savings_account': 'Savings Account',
@@ -201,7 +201,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: selectedType,
+                initialValue: selectedType,
                 decoration: InputDecoration(
                   labelText: 'Asset Type',
                   prefixIcon: const Icon(Icons.category_outlined),
@@ -225,7 +225,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
                     value: type,
                     child: Padding(
                       padding: const EdgeInsets.only(left: 12),
-                      child: Text(_displayName(type)),
+                      child: Text(displayName(type)),
                     ),
                   )),
                 ]).toList(),

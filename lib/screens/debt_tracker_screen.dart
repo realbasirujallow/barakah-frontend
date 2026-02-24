@@ -91,13 +91,17 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: selectedType,
+                  initialValue: selectedType,
                   decoration: const InputDecoration(labelText: 'Type', border: OutlineInputBorder()),
                   items: _types.map((t) => DropdownMenuItem(
                     value: t,
                     child: Text(_typeLabels[t] ?? t),
                   )).toList(),
-                  onChanged: (v) => setSheetState(() => selectedType = v!),
+                  onChanged: (v) => setSheetState(() {
+  selectedType = v!;
+  final rate = double.tryParse(rateCtrl.text) ?? 0;
+  isRibaFree = rate == 0 || selectedType == 'islamic_mortgage';
+}),
                 ),
                 const SizedBox(height: 12),
                 TextField(
@@ -121,7 +125,7 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
                         decoration: const InputDecoration(labelText: 'Interest Rate %', border: OutlineInputBorder()),
                         onChanged: (v) {
                           final rate = double.tryParse(v) ?? 0;
-                          setSheetState(() => isRibaFree = rate == 0);
+                          setSheetState(() => isRibaFree = rate == 0 || selectedType == 'islamic_mortgage');
                         },
                       ),
                     ),

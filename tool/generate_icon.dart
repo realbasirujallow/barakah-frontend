@@ -67,8 +67,12 @@ double _sin(double a) => _cosApprox(a - 1.5707963);
 
 double _cosApprox(double x) {
   // Normalize x
-  while (x > 3.14159265) x -= 6.28318530;
-  while (x < -3.14159265) x += 6.28318530;
+  while (x > 3.14159265) {
+    x -= 6.28318530;
+  }
+  while (x < -3.14159265) {
+    x += 6.28318530;
+  }
   final x2 = x * x;
   return 1 - x2 / 2 + x2 * x2 / 24 - x2 * x2 * x2 / 720 + x2 * x2 * x2 * x2 / 40320;
 }

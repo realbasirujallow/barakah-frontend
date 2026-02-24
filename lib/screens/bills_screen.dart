@@ -100,7 +100,7 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
                     decoration: const InputDecoration(labelText: 'Due Day (1-31)', border: OutlineInputBorder(), prefixIcon: Icon(Icons.calendar_today))),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: selectedCategory,
+                  initialValue: selectedCategory,
                   decoration: const InputDecoration(labelText: 'Category', border: OutlineInputBorder()),
                   items: _categories.map((c) => DropdownMenuItem(
                     value: c,
@@ -114,7 +114,7 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: frequency,
+                  initialValue: frequency,
                   decoration: const InputDecoration(labelText: 'Frequency', border: OutlineInputBorder()),
                   items: ['monthly', 'weekly', 'yearly', 'one_time'].map((f) => DropdownMenuItem(
                     value: f,
@@ -258,7 +258,7 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
           children: [
             Icon(Icons.receipt_long, size: 64, color: theme.dividerColor),
             const SizedBox(height: 16),
-            Text(tab == 'paid' ? 'No paid bills' : 'No ${tab} bills',
+            Text(tab == 'paid' ? 'No paid bills' : 'No $tab bills',
                 style: TextStyle(fontSize: 16, color: theme.colorScheme.onSurfaceVariant)),
           ],
         ),

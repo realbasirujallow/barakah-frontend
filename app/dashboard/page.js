@@ -251,19 +251,38 @@ function AssetsTab({ assets, onRefresh }) {
               className="px-4 py-2 border rounded-lg"
               required
             />
-            <select
-              value={formData.type}
-              onChange={(e) => setFormData({...formData, type: e.target.value})}
-              className="px-4 py-2 border rounded-lg"
-            >
-              <option value="cash">Cash</option>
-              <option value="gold">Gold</option>
-              <option value="property">Property</option>
-              <option value="investment">Investment</option>
-              <option value="business">Business</option>
-              <option value="529">529 Plan</option>
-              <option value="individual_brokerage">Individual Brokerage Account</option>
-            </select>
+           <select
+  value={formData.type}
+  onChange={(e) => setFormData({...formData, type: e.target.value})}
+  className="px-4 py-2 border rounded-lg"
+>
+  <option value="cash">Cash</option>
+  <option value="gold">Gold</option>
+  <option value="property">Property</option>
+  <option value="investment">Investment</option>
+  <option value="business">Business</option>
+
+  {/* Retirement */}
+  <option disabled>── Retirement ──</option>
+  <option value="401k">　401(k)</option>
+  <option value="ira">　IRA</option>
+  <option value="roth_ira">　Roth IRA</option>
+  <option value="pension">　Pension</option>
+  <option value="hsa">　HSA</option>
+
+  {/* Education */}
+  <option disabled>── Education ──</option>
+  <option value="529">　529 Plan</option>
+
+  {/* Real Estate */}
+  <option disabled>── Real Estate ──</option>
+  <option value="primary_home">　Primary Home</option>
+  <option value="investment_property">　Investment Property</option>
+  <option value="rental_property">　Rental Property</option>
+
+  {/* Other */}
+  <option value="individual_brokerage">Individual Brokerage</option>
+</select>
             <input
               type="number"
               placeholder="Value"

@@ -93,7 +93,7 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
                     decoration: const InputDecoration(labelText: 'Amount', border: OutlineInputBorder(), prefixIcon: Icon(Icons.attach_money))),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: selectedCategory,
+                  initialValue: selectedCategory,
                   decoration: const InputDecoration(labelText: 'Category', border: OutlineInputBorder()),
                   items: _categories.map((c) => DropdownMenuItem(
                     value: c,
@@ -118,7 +118,7 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
                   onChanged: (v) => setSheetState(() => isAnonymous = v),
                   title: const Text('Anonymous Donation'),
                   subtitle: const Text('Hide your name from the record'),
-                  activeColor: AppTheme.deepGreen,
+                  activeThumbColor: AppTheme.deepGreen,
                   contentPadding: EdgeInsets.zero,
                 ),
                 const SizedBox(height: 8),

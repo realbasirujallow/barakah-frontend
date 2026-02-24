@@ -25,7 +25,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _zakatDue = false;
   bool _isLoading = true;
   String? _error;
-  bool _isEditingGrid = false;
+  final bool _isEditingGrid = false;
 
   // Default quick action order
   static const List<Map<String, dynamic>> _defaultActions = [
@@ -182,8 +182,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   Widget build(BuildContext context) {
       final prefs = SharedPreferences.getInstance();
-      bool _hideNetWorth = false;
-      prefs.then((p) => _hideNetWorth = p.getBool('hide_net_worth') ?? false);
+      bool hideNetWorth = false;
+      prefs.then((p) => hideNetWorth = p.getBool('hide_net_worth') ?? false);
     final theme = Theme.of(context);
     final authService = context.watch<AuthService>();
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);

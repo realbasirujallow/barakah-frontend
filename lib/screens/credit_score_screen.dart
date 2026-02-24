@@ -776,7 +776,7 @@ class _CreditScoreScreenState extends State<CreditScoreScreen>
                         ),
                         const SizedBox(height: 14),
                         DropdownButtonFormField<String>(
-                          value: source,
+                          initialValue: source,
                           decoration: const InputDecoration(
                             labelText: 'Source',
                             border: OutlineInputBorder(),
