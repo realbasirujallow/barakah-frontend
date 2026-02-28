@@ -25,7 +25,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   bool _zakatDue = false;
   bool _isLoading = true;
   String? _error;
-  final bool _isEditingGrid = false;
+  bool _isEditingGrid = false;
 
   // Default quick action order
   static const List<Map<String, dynamic>> _defaultActions = [
