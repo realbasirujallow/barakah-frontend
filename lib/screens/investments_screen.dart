@@ -116,7 +116,7 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  initialValue: accountType,
+                  value: accountType,
                   decoration: InputDecoration(
                     labelText: 'Account Type',
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -563,7 +563,7 @@ class _AccountDetailScreenState extends State<_AccountDetailScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  initialValue: holdingType,
+                  value: holdingType,
                   decoration: InputDecoration(
                     labelText: 'Type',
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

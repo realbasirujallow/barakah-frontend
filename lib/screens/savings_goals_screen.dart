@@ -110,7 +110,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
               ),
               const SizedBox(height: 12),
               DropdownButtonFormField<String>(
-                initialValue: selectedCategory,
+                value: selectedCategory,
                 decoration: InputDecoration(
                   labelText: 'Category',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

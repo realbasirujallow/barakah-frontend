@@ -93,7 +93,7 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
                     decoration: const InputDecoration(labelText: 'Amount', border: OutlineInputBorder(), prefixIcon: Icon(Icons.attach_money))),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  initialValue: selectedCategory,
+                  value: selectedCategory,
                   decoration: const InputDecoration(labelText: 'Category', border: OutlineInputBorder()),
                   items: _categories.map((c) => DropdownMenuItem(
                     value: c,

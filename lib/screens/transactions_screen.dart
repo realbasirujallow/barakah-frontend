@@ -165,7 +165,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 const SizedBox(height: 16),
 
                 DropdownButtonFormField<String>(
-                  initialValue: category,
+                  value: category,
                   decoration: InputDecoration(
                     labelText: 'Category',
                     prefixIcon: const Icon(Icons.category_outlined),
@@ -221,7 +221,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: DropdownButtonFormField<String>(
-                      initialValue: frequency,
+                      value: frequency,
                       decoration: InputDecoration(
                         labelText: 'Frequency',
                         prefixIcon: const Icon(Icons.schedule),

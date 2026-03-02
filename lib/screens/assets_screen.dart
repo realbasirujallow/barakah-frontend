@@ -201,7 +201,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                initialValue: selectedType,
+                value: selectedType,
                 decoration: InputDecoration(
                   labelText: 'Asset Type',
                   prefixIcon: const Icon(Icons.category_outlined),
