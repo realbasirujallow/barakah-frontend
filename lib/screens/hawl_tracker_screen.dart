@@ -18,6 +18,10 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
   int _zakatDueCount = 0;
   double _totalZakatDue = 0;
   int _upcomingCount = 0;
+  String? _nextDueAsset;
+  int _nextDueDays = 0;
+  double _nextDueAmount = 0;
+  int? _nextDueDate;
   bool _isLoading = true;
 
   final _assetTypes = ['cash', 'gold', 'silver', 'stocks', 'crypto', 'business', 'other'];
@@ -56,6 +60,10 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
         _zakatDueCount = (data['zakatDueCount'] as num?)?.toInt() ?? 0;
         _totalZakatDue = (data['totalZakatDue'] as num?)?.toDouble() ?? 0;
         _upcomingCount = (data['upcomingIn30Days'] as num?)?.toInt() ?? 0;
+        _nextDueAsset = data['nextZakatDueAsset'] as String?;
+        _nextDueDays = (data['nextZakatDueDays'] as num?)?.toInt() ?? 0;
+        _nextDueAmount = (data['nextZakatDueAmount'] as num?)?.toDouble() ?? 0;
+        _nextDueDate = (data['nextZakatDueDate'] as num?)?.toInt();
         _isLoading = false;
       });
       // Check hawl reminders
@@ -206,7 +214,52 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
                       ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 16),
+
+                  // Next Zakat Due countdown
+                  if (_nextDueAsset != null && _nextDueDays > 0)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 16),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        gradient: const LinearGradient(colors: [Color(0xFF1565C0), Color(0xFF1976D2)]),
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 56, height: 56,
+                            decoration: BoxDecoration(color: Colors.white.withAlpha(30), borderRadius: BorderRadius.circular(14)),
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text('$_nextDueDays', style: const TextStyle(color: Colors.white, fontSize: 22, fontWeight: FontWeight.bold)),
+                                const Text('days', style: TextStyle(color: Colors.white70, fontSize: 10)),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text('Next Zakat Due', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 15)),
+                                const SizedBox(height: 4),
+                                Text(_nextDueAsset!, style: const TextStyle(color: Colors.white70, fontSize: 13)),
+                                if (_nextDueDate != null)
+                                  Text(DateFormat('MMM dd, yyyy').format(DateTime.fromMillisecondsSinceEpoch(_nextDueDate!)),
+                                      style: const TextStyle(color: Colors.white54, fontSize: 11)),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                            decoration: BoxDecoration(color: Colors.white.withAlpha(30), borderRadius: BorderRadius.circular(10)),
+                            child: Text(fmt.format(_nextDueAmount), style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold, fontSize: 13)),
+                          ),
+                        ],
+                      ),
+                    ),
 
                   if (_trackers.isEmpty)
                     Center(
