@@ -569,7 +569,7 @@ class _ZakatScreenState extends State<ZakatScreen> with SingleTickerProviderStat
       case 'gold': return '🥇';
       case 'cash': case 'savings_account': case 'checking_account': return '💵';
       case 'primary_home': case 'real_estate': case 'property': return '🏠';
-      case 'investment_property': case 'rental_property': return '🏢';
+      case 'investment_property': case 'investment_property_resale': case 'rental_property': return '🏢';
       case 'vehicle': case 'car': return '🚗';
       case '401k': case 'roth_ira': case 'ira': case 'hsa': case '403b': case 'pension': return '🏦';
       case '529': return '🎓';
