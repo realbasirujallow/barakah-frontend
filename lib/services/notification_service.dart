@@ -12,6 +12,29 @@ class NotificationService {
       FlutterLocalNotificationsPlugin();
   bool _initialized = false;
 
+  // ── Once-per-day guard ──
+  // Prevents the same notification from firing more than once per calendar day.
+  static final Map<String, String> _shownTodayCache = {};
+
+  static Future<bool> _alreadyShownToday(String key) async {
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    if (_shownTodayCache[key] == today) return true;
+    final prefs = await SharedPreferences.getInstance();
+    final lastShown = prefs.getString('notif_shown_$key');
+    if (lastShown == today) {
+      _shownTodayCache[key] = today;
+      return true;
+    }
+    return false;
+  }
+
+  static Future<void> _markShownToday(String key) async {
+    final today = DateTime.now().toIso8601String().substring(0, 10);
+    _shownTodayCache[key] = today;
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('notif_shown_$key', today);
+  }
+
   // Channel IDs
   static const _billChannel = 'barakah_bills';
   static const _budgetChannel = 'barakah_budget';
@@ -189,6 +212,7 @@ class NotificationService {
   }) async {
     final enabled = await isEnabled();
     if (!enabled) return;
+    if (await _alreadyShownToday('budget_${category.hashCode}')) return;
 
     final percentage = (spent / budgetLimit * 100).toStringAsFixed(0);
     if (spent >= budgetLimit) {
@@ -210,6 +234,7 @@ class NotificationService {
         channelName: 'Budget Alerts',
       );
     }
+    await _markShownToday('budget_${category.hashCode}');
   }
 
   // ── Zakat & Hawl ──
@@ -217,6 +242,8 @@ class NotificationService {
   Future<void> showZakatReminder(double zakatDue) async {
     final enabled = await isZakatEnabled();
     if (!enabled) return;
+    if (await _alreadyShownToday('zakat_reminder')) return;
+    await _markShownToday('zakat_reminder');
 
     await showNotification(
       id: 999,
@@ -234,6 +261,8 @@ class NotificationService {
   }) async {
     final enabled = await isZakatEnabled();
     if (!enabled) return;
+    if (await _alreadyShownToday('hawl_${assetName.hashCode}')) return;
+    await _markShownToday('hawl_${assetName.hashCode}');
 
     if (daysRemaining <= 0) {
       await showNotification(
