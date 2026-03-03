@@ -209,6 +209,10 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
+  Future<void> deleteAccount(String password) async {
+    await _dio.delete('/auth/delete-account', data: {'password': password});
+  }
+
   // ─── Savings Goals ───────────────────────────────────
 
   Future<Map<String, dynamic>> getSavingsGoals() async {
