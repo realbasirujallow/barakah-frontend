@@ -181,7 +181,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final authService = context.watch<AuthService>();
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
 
@@ -212,7 +211,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             icon: const Icon(Icons.logout),
             onPressed: () async {
               await authService.logout();
-              if (mounted) {
+              if (context.mounted) {
                 Navigator.pushReplacementNamed(context, '/login');
               }
             },

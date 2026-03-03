@@ -116,7 +116,7 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: accountType,
+                  initialValue: accountType,
                   decoration: InputDecoration(
                     labelText: 'Account Type',
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -563,7 +563,7 @@ class _AccountDetailScreenState extends State<_AccountDetailScreen> {
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: holdingType,
+                  initialValue: holdingType,
                   decoration: InputDecoration(
                     labelText: 'Type',
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -752,9 +752,9 @@ class _AccountDetailScreenState extends State<_AccountDetailScreen> {
                   try {
                     await _api.deleteInvestmentAccount(widget.accountId);
                     widget.onChanged();
-                    if (mounted) Navigator.pop(context);
+                    if (context.mounted) Navigator.pop(context);
                   } catch (e) {
-                    if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                    if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
                   }
                 }
               }
@@ -853,7 +853,7 @@ class _AccountDetailScreenState extends State<_AccountDetailScreen> {
                                 _loadAccount();
                                 widget.onChanged();
                               } catch (e) {
-                                if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
+                                if (context.mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e')));
                               }
                             }
                           },

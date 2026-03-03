@@ -327,7 +327,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             subtitle: 'Remove offline data',
             onTap: () async {
               await CacheService().clearAll();
-              if (mounted) {
+              if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Cache cleared'), backgroundColor: AppTheme.deepGreen),
                 );
@@ -352,7 +352,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             child: OutlinedButton.icon(
               onPressed: () async {
                 await authService.logout();
-                if (mounted) {
+                if (context.mounted) {
                   Navigator.pushReplacementNamed(context, '/login');
                 }
               },

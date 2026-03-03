@@ -967,7 +967,7 @@ class _CreditScoreScreenState extends State<CreditScoreScreen>
 
     try {
       await _apiService.addCreditScore(data);
-      if (mounted) Navigator.pop(ctx);
+      if (ctx.mounted) Navigator.pop(ctx);
       _loadData();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

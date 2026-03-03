@@ -442,10 +442,10 @@ class ApiService {
       'name': name,
       'type': type,
       'totalAmount': totalAmount,
-      if (monthlyPayment != null) 'monthlyPayment': monthlyPayment,
-      if (interestRate != null) 'interestRate': interestRate,
-      if (ribaFree != null) 'ribaFree': ribaFree,
-      if (lender != null) 'lender': lender,
+      'monthlyPayment': ?monthlyPayment,
+      'interestRate': ?interestRate,
+      'ribaFree': ?ribaFree,
+      'lender': ?lender,
     });
     return response.data as Map<String, dynamic>;
   }

@@ -117,7 +117,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
               const Text('Add Budget', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: selectedCategory,
+                initialValue: selectedCategory,
                 decoration: const InputDecoration(labelText: 'Category', border: OutlineInputBorder()),
                 items: _categories.map((c) => DropdownMenuItem(
                   value: c,
@@ -153,7 +153,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                         month: _selectedMonth,
                         year: _selectedYear,
                       );
-                      if (mounted) Navigator.pop(ctx);
+                      if (ctx.mounted) Navigator.pop(ctx);
                       _loadBudgets();
                     } catch (e) {
                       if (mounted) {

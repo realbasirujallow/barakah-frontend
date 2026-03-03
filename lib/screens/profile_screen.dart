@@ -36,8 +36,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   Future<void> _loadProfile() async {
+    final authService = Provider.of<AuthService>(context, listen: false);
     try {
-      final api = ApiService(Provider.of<AuthService>(context, listen: false));
+      final api = ApiService(authService);
       final data = await api.getProfile();
       setState(() {
         _nameController.text = data['fullName'] ?? '';
@@ -46,10 +47,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
       });
     } catch (e) {
       // Fallback to local data
-      final auth = Provider.of<AuthService>(context, listen: false);
       setState(() {
-        _nameController.text = auth.userName ?? '';
-        _emailController.text = auth.userEmail ?? '';
+        _nameController.text = authService.userName ?? '';
+        _emailController.text = authService.userEmail ?? '';
         _loading = false;
       });
     }

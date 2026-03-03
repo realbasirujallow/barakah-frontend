@@ -1,6 +1,5 @@
 // ignore_for_file: avoid_print
 import 'dart:io';
-import 'dart:typed_data';
 import 'package:image/image.dart' as img;
 
 void main() {
@@ -11,7 +10,6 @@ void main() {
   final green = img.ColorRgba8(0x1B, 0x5E, 0x20, 0xFF);
   final gold = img.ColorRgba8(0xFF, 0xD7, 0x00, 0xFF);
   final white = img.ColorRgba8(0xFF, 0xFF, 0xFF, 0xFF);
-  final darkGreen = img.ColorRgba8(0x0D, 0x3B, 0x0F, 0xFF);
 
   // Fill background with deep green
   img.fill(image, color: green);
