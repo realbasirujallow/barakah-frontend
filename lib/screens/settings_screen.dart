@@ -51,8 +51,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 
   Future<void> _loadPreferences() async {
-      _hideNetWorth = prefs.getBool('hide_net_worth') ?? false;
     final prefs = await SharedPreferences.getInstance();
+    _hideNetWorth = prefs.getBool('hide_net_worth') ?? false;
     final bio = BiometricService();
     final bioAvailable = await bio.isAvailable();
     final bioEnabled = await bio.isEnabled();
@@ -88,22 +88,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   @override
   Widget build(BuildContext context) {
-              _sectionHeader('Privacy'),
-              _settingsTile(
-                icon: Icons.visibility_off,
-                title: 'Hide Net Worth',
-                subtitle: _hideNetWorth ? 'Hidden on Dashboard' : 'Visible on Dashboard',
-                trailing: Switch(
-                  value: _hideNetWorth,
-                  onChanged: (v) async {
-                    final prefs = await SharedPreferences.getInstance();
-                    await prefs.setBool('hide_net_worth', v);
-                    setState(() => _hideNetWorth = v);
-                  },
-                  activeTrackColor: AppTheme.deepGreen,
-                ),
-              ),
-              const SizedBox(height: 16),
     final themeProvider = Provider.of<ThemeProvider>(context);
     final authService = Provider.of<AuthService>(context);
     final isDark = themeProvider.isDarkMode;
@@ -315,6 +299,24 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _navTile(Icons.calculate, 'Zakat Calculator', '/zakat'),
           _navTile(Icons.trending_up, 'Market Prices', '/prices'),
           _navTile(Icons.picture_as_pdf, 'PDF Reports', '/reports'),
+          const SizedBox(height: 16),
+
+          // Privacy
+          _sectionHeader('Privacy'),
+          _settingsTile(
+            icon: Icons.visibility_off,
+            title: 'Hide Net Worth',
+            subtitle: _hideNetWorth ? 'Hidden on Dashboard' : 'Visible on Dashboard',
+            trailing: Switch(
+              value: _hideNetWorth,
+              onChanged: (v) async {
+                final prefs = await SharedPreferences.getInstance();
+                await prefs.setBool('hide_net_worth', v);
+                setState(() => _hideNetWorth = v);
+              },
+              activeTrackColor: AppTheme.deepGreen,
+            ),
+          ),
           const SizedBox(height: 16),
 
           // Data
