@@ -145,11 +145,16 @@ class _BudgetScreenState extends State<BudgetScreen> {
                 child: ElevatedButton(
                   onPressed: () async {
                     if (limitController.text.isEmpty) return;
+                    final limit = double.tryParse(limitController.text);
+                    if (limit == null) {
+                      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid number'), backgroundColor: Colors.red));
+                      return;
+                    }
                     try {
                       final api = ApiService(context.read<AuthService>());
                       await api.addBudget(
                         category: selectedCategory,
-                        monthlyLimit: double.parse(limitController.text),
+                        monthlyLimit: limit,
                         month: _selectedMonth,
                         year: _selectedYear,
                       );
