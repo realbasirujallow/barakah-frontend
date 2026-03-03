@@ -53,8 +53,8 @@ class _NetWorthScreenState extends State<NetWorthScreen> {
       final authService = context.read<AuthService>();
       final apiService = ApiService(authService);
 
-      // Record a snapshot first, then fetch history
-      await apiService.recordNetWorthSnapshot();
+      // Record a snapshot first (non-blocking), then fetch history
+      try { await apiService.recordNetWorthSnapshot(); } catch (_) {}
       final data = await apiService.getNetWorthHistory(period: _period);
 
       final history = (data['history'] as List<dynamic>?) ?? [];
@@ -95,6 +95,8 @@ class _NetWorthScreenState extends State<NetWorthScreen> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Net Worth'),
+        backgroundColor: AppTheme.deepGreen,
+        foregroundColor: Colors.white,
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
