@@ -323,9 +323,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
           _sectionHeader('Data'),
           _settingsTile(
             icon: Icons.upload_file,
-            title: 'Import from Monarch Money',
-            subtitle: 'Import balances CSV as assets & debts',
-            onTap: () => Navigator.pushNamed(context, '/monarch-import'),
+            title: 'Import Data',
+            subtitle: 'Import CSV from Monarch, Chase, Wells Fargo, etc.',
+            onTap: () => Navigator.pushNamed(context, '/import'),
           ),
           _settingsTile(
             icon: Icons.delete_outline,
