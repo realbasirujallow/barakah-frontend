@@ -146,7 +146,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       setState(() {
         _assets = assets;
-        _totalValue = (totals['totalWealth'] as num?)?.toDouble() ?? 0;
+        _totalValue = (totals['netWorth'] as num?)?.toDouble() ?? 0;
         _zakatAmount = (totals['zakatDue'] as num?)?.toDouble() ?? 0;
         _zakatDue = totals['zakatEligible'] as bool? ?? false;
         _isLoading = false;
@@ -164,7 +164,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       if (cachedAssets.isNotEmpty || cachedTotal != null) {
         setState(() {
           _assets = cachedAssets;
-          _totalValue = (cachedTotal?['totalWealth'] as num?)?.toDouble() ?? 0;
+          _totalValue = (cachedTotal?['netWorth'] as num?)?.toDouble() ?? 0;
           _zakatAmount = (cachedTotal?['zakatDue'] as num?)?.toDouble() ?? 0;
           _zakatDue = cachedTotal?['zakatEligible'] as bool? ?? false;
           _isLoading = false;
