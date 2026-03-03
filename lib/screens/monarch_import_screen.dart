@@ -47,6 +47,8 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
   bool _importing = false;
   String? _error;
   List<_Account> _accounts = [];
+  List<_ExistingAccount> _existingAssets = [];
+  List<_ExistingAccount> _existingDebts = [];
   int _totalRecords = 0;
   Map<String, dynamic>? _result;
 
@@ -78,8 +80,29 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
         setState(() { _error = data['error'] as String; _uploading = false; });
         return;
       }
+      // Parse existing assets & debts for reconciliation
+      final existingAssets = ((data['existingAssets'] as List?) ?? []).map((a) {
+        final m = a as Map<String, dynamic>;
+        return _ExistingAccount(
+          id: (m['id'] as num).toInt(),
+          name: m['name'] as String,
+          type: m['type'] as String? ?? 'other',
+          value: (m['value'] as num?)?.toDouble() ?? (m['remainingAmount'] as num?)?.toDouble() ?? 0,
+        );
+      }).toList();
+      final existingDebts = ((data['existingDebts'] as List?) ?? []).map((a) {
+        final m = a as Map<String, dynamic>;
+        return _ExistingAccount(
+          id: (m['id'] as num).toInt(),
+          name: m['name'] as String,
+          type: m['type'] as String? ?? 'other',
+          value: (m['remainingAmount'] as num?)?.toDouble() ?? (m['value'] as num?)?.toDouble() ?? 0,
+        );
+      }).toList();
+
       final accounts = (data['accounts'] as List).map((a) {
         final m = a as Map<String, dynamic>;
+        final suggestedMatch = m['suggestedMatch'] as Map<String, dynamic>?;
         return _Account(
           name: m['accountName'] as String,
           latestBalance: (m['latestBalance'] as num).toDouble(),
@@ -87,11 +110,15 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
           suggestedType: m['suggestedType'] as String,
           isDebt: m['isDebt'] as bool,
           skip: m['skip'] as bool,
+          action: suggestedMatch != null ? 'update' : 'create',
+          existingId: suggestedMatch != null ? (suggestedMatch['id'] as num).toInt() : null,
         );
       }).toList();
 
       setState(() {
         _accounts = accounts;
+        _existingAssets = existingAssets;
+        _existingDebts = existingDebts;
         _totalRecords = (data['totalRecords'] as num).toInt();
         _step = _Step.preview;
         _uploading = false;
@@ -112,6 +139,8 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
         'isDebt': a.isDebt,
         'latestBalance': a.latestBalance,
         'skip': a.skip,
+        'action': a.action,
+        'existingId': a.existingId,
       }).toList();
       final data = await _api.monarchExecute(payload);
       if (data.containsKey('error') && data['success'] != true) {
@@ -129,6 +158,7 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
   int get _activeCount => _accounts.where((a) => !a.skip).length;
   int get _assetCount => _accounts.where((a) => !a.skip && !a.isDebt).length;
   int get _debtCount => _accounts.where((a) => !a.skip && a.isDebt).length;
+  int get _updateCount => _accounts.where((a) => !a.skip && a.action == 'update').length;
 
   String _fmt(double v) => v < 0
       ? '-\$${v.abs().toStringAsFixed(0)}'
@@ -218,6 +248,8 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
             _statChip('Records', _totalRecords.toString(), Colors.grey[700]!),
             _statChip('Assets', '$_assetCount', AppTheme.deepGreen),
             _statChip('Debts', '$_debtCount', Colors.red),
+            if (_updateCount > 0)
+              _statChip('Updates', '$_updateCount', Colors.blue),
           ],
         ),
         const SizedBox(height: 8),
@@ -274,6 +306,11 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
   Widget _accountTile(int index) {
     final a = _accounts[index];
     final types = a.isDebt ? _debtTypes : _assetTypes;
+    final existingList = a.isDebt ? _existingDebts : _existingAssets;
+    final matchedExisting = a.action == 'update' && a.existingId != null
+        ? existingList.where((e) => e.id == a.existingId).firstOrNull
+        : null;
+
     return Opacity(
       opacity: a.skip ? 0.4 : 1.0,
       child: Card(
@@ -291,10 +328,21 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
                     onChanged: (_) => setState(() => a.skip = !a.skip),
                   ),
                   Expanded(
-                    child: Text(
-                      a.name,
-                      style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
-                      maxLines: 1, overflow: TextOverflow.ellipsis,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          a.name,
+                          style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+                          maxLines: 1, overflow: TextOverflow.ellipsis,
+                        ),
+                        if (matchedExisting != null)
+                          Text(
+                            '↳ Merging with: ${matchedExisting.name} (${_fmt(matchedExisting.value)})',
+                            style: const TextStyle(fontSize: 11, color: Colors.blue),
+                            maxLines: 1, overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
                     ),
                   ),
                   Text(
@@ -321,6 +369,8 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
                       onSelectionChanged: (s) => setState(() {
                         a.isDebt = s.first;
                         a.type = 'other';
+                        a.action = 'create';
+                        a.existingId = null;
                       }),
                       style: ButtonStyle(
                         visualDensity: VisualDensity.compact,
@@ -344,6 +394,57 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
                     ),
                   ],
                 ),
+                // ── Action row: Create New vs Update Existing ──
+                if (existingList.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Padding(
+                    padding: const EdgeInsets.only(left: 48),
+                    child: DropdownButtonFormField<String>(
+                      value: a.action == 'update' && a.existingId != null
+                          ? 'update-${a.existingId}'
+                          : 'create',
+                      isDense: true,
+                      decoration: InputDecoration(
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        border: const OutlineInputBorder(),
+                        isDense: true,
+                        labelText: 'Action',
+                        labelStyle: TextStyle(
+                          fontSize: 12,
+                          color: a.action == 'update' ? Colors.blue : Colors.grey,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderSide: BorderSide(
+                            color: a.action == 'update' ? Colors.blue : Colors.grey.shade400,
+                          ),
+                        ),
+                      ),
+                      items: [
+                        const DropdownMenuItem(
+                          value: 'create',
+                          child: Text('+ Create New', style: TextStyle(fontSize: 13)),
+                        ),
+                        ...existingList.map((ex) => DropdownMenuItem(
+                          value: 'update-${ex.id}',
+                          child: Text(
+                            '↳ ${ex.name} (${_fmt(ex.value)})',
+                            style: const TextStyle(fontSize: 12, color: Colors.blue),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        )),
+                      ],
+                      onChanged: (v) => setState(() {
+                        if (v == 'create' || v == null) {
+                          a.action = 'create';
+                          a.existingId = null;
+                        } else {
+                          a.action = 'update';
+                          a.existingId = int.parse(v.replaceFirst('update-', ''));
+                        }
+                      }),
+                    ),
+                  ),
+                ],
               ],
             ],
           ),
@@ -356,7 +457,9 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
 
   Widget _doneView() {
     final assetsCreated = (_result?['assetsCreated'] as num?)?.toInt() ?? 0;
+    final assetsUpdated = (_result?['assetsUpdated'] as num?)?.toInt() ?? 0;
     final debtsCreated = (_result?['debtsCreated'] as num?)?.toInt() ?? 0;
+    final debtsUpdated = (_result?['debtsUpdated'] as num?)?.toInt() ?? 0;
     final errors = (_result?['errors'] as List?)?.cast<String>() ?? [];
 
     return Center(
@@ -367,12 +470,21 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
           const SizedBox(height: 16),
           const Text('Import Complete!', style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
           const SizedBox(height: 12),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            alignment: WrapAlignment.center,
+            spacing: 12,
+            runSpacing: 8,
             children: [
-              _resultBadge('$assetsCreated asset${assetsCreated != 1 ? 's' : ''}', AppTheme.deepGreen),
-              const SizedBox(width: 16),
-              _resultBadge('$debtsCreated debt${debtsCreated != 1 ? 's' : ''}', Colors.red),
+              if (assetsCreated > 0)
+                _resultBadge('$assetsCreated created', AppTheme.deepGreen),
+              if (assetsUpdated > 0)
+                _resultBadge('$assetsUpdated updated', Colors.blue),
+              if (debtsCreated > 0)
+                _resultBadge('$debtsCreated debt${debtsCreated != 1 ? 's' : ''}', Colors.red),
+              if (debtsUpdated > 0)
+                _resultBadge('$debtsUpdated debt${debtsUpdated != 1 ? 's' : ''} updated', Colors.orange),
+              if (assetsCreated == 0 && assetsUpdated == 0 && debtsCreated == 0 && debtsUpdated == 0)
+                _resultBadge('No changes', Colors.grey),
             ],
           ),
           if (errors.isNotEmpty) ...[
@@ -469,6 +581,8 @@ class _Account {
   String type;
   bool isDebt;
   bool skip;
+  String action;   // 'create' or 'update'
+  int? existingId; // ID of existing asset/debt when action='update'
 
   _Account({
     required this.name,
@@ -477,5 +591,22 @@ class _Account {
     required String suggestedType,
     required this.isDebt,
     required this.skip,
+    this.action = 'create',
+    this.existingId,
   }) : type = suggestedType;
+}
+
+/// Existing user asset or debt returned from the backend for reconciliation.
+class _ExistingAccount {
+  final int id;
+  final String name;
+  final String type;
+  final double value;
+
+  _ExistingAccount({
+    required this.id,
+    required this.name,
+    required this.type,
+    required this.value,
+  });
 }
