@@ -51,6 +51,9 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   Future<void> _deleteTransaction(Transaction t) async {
+    final authService = context.read<AuthService>();
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -68,15 +71,12 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     );
     if (confirmed != true) return;
     try {
-      final authService = context.read<AuthService>();
       await ApiService(authService).deleteTransaction(t.id!);
       _loadData();
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(ApiService.errorMessage(e)), backgroundColor: Colors.red),
-        );
-      }
+      scaffoldMessenger.showSnackBar(
+        SnackBar(content: Text(ApiService.errorMessage(e)), backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -176,7 +176,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                 const SizedBox(height: 16),
 
                 DropdownButtonFormField<String>(
-                  value: category,
+                  initialValue: category,
                   decoration: InputDecoration(
                     labelText: 'Category',
                     prefixIcon: const Icon(Icons.category_outlined),
@@ -232,7 +232,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: DropdownButtonFormField<String>(
-                      value: frequency,
+                      initialValue: frequency,
                       decoration: InputDecoration(
                         labelText: 'Frequency',
                         prefixIcon: const Icon(Icons.schedule),

@@ -98,7 +98,7 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
                 TextField(controller: nameCtrl, decoration: const InputDecoration(labelText: 'Asset Name', border: OutlineInputBorder())),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: selectedType,
+                  initialValue: selectedType,
                   decoration: const InputDecoration(labelText: 'Asset Type', border: OutlineInputBorder()),
                   items: _assetTypes.map((t) => DropdownMenuItem(
                     value: t,
@@ -129,7 +129,7 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
                           assetType: selectedType,
                           notes: notesCtrl.text.isNotEmpty ? notesCtrl.text : null,
                         );
-                        if (mounted) Navigator.pop(ctx);
+                        if (ctx.mounted) Navigator.pop(ctx);
                         _loadTrackers();
                       } catch (e) {
                         if (mounted) {
@@ -229,7 +229,6 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
                       final daysRemaining = (tracker['daysRemaining'] as num?)?.toInt() ?? 0;
                       final assetType = tracker['assetType'] as String? ?? 'other';
                       final startDate = tracker['hawlStartDate'] as int? ?? 0;
-                      final endDate = tracker['hawlEndDate'] as int? ?? 0;
 
                       return Container(
                         margin: const EdgeInsets.only(bottom: 12),

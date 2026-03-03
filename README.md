@@ -1,74 +1,78 @@
-<<<<<<< HEAD
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Barakah — Islamic Finance Tracker (Flutter Mobile)
+
+A Flutter mobile app for halal-conscious personal finance management. Tracks assets, debts, budgets, transactions, zakat, sadaqah, waqf, wasiyyah, and more.
+
+## Prerequisites
+
+- Flutter SDK ^3.11.0 (Dart ^3.11.0)
+- Android Studio / Xcode for emulator/device
+- Backend running at `https://api.trybarakah.com` (or local instance)
 
 ## Getting Started
 
-First, run the development server:
-
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+flutter pub get
+flutter run
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Build-Time API URL
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-=======
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
-
-## Getting Started
-
-First, run the development server:
+The app connects to `https://api.trybarakah.com` by default. Override at build time with `--dart-define`:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+# Local development (use your machine's LAN IP, not localhost)
+flutter run --dart-define=API_URL=http://192.168.1.x:8080
+
+# Debug APK pointing to local backend
+flutter build apk --debug --dart-define=API_URL=http://192.168.1.x:8080
+
+# Release APK (uses default production URL)
+flutter build apk --release
+
+# Release APK with custom API URL
+flutter build apk --release --dart-define=API_URL=https://your-api.example.com
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+> **Note:** Android emulator uses `10.0.2.2` to reach the host machine's localhost.
+> So for emulator testing: `--dart-define=API_URL=http://10.0.2.2:8080`
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Project Structure
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+lib/
+  main.dart            # App entry point with global error handling
+  models/              # Data models (Asset, Transaction, etc.)
+  screens/             # All UI screens
+  services/            # API service, auth service, biometric, cache
+  theme/               # App theme constants
+  widgets/             # Reusable widget components
+```
 
-## Learn More
+## Key Features
 
-To learn more about Next.js, take a look at the following resources:
+- **Dashboard** — Net worth overview, zakat indicator, quick actions
+- **Transactions** — Income/expense tracking with categories, recurring support
+- **Assets** — Multi-type asset management (cash, stocks, crypto, real estate, retirement)
+- **Budgets** — Monthly budget tracking per category
+- **Debt Tracker** — Riba detection, payment tracking, Islamic alternatives
+- **Savings Goals** — Goal-based savings with progress tracking
+- **Zakat Calculator** — Nisab threshold, hawl tracking, zakatable wealth breakdown
+- **Sadaqah & Waqf** — Charity and endowment tracking
+- **Wasiyyah** — Islamic will / beneficiary management
+- **Halal Screener** — Stock halal compliance checking
+- **Shared Finances** — Family/group finance management
+- **Investments** — Portfolio tracking with gain/loss
+- **Biometric Auth** — Fingerprint/face login support
+- **Credit Score** — Credit score tracking and tips
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Running Tests
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+```bash
+flutter test
+```
 
-## Deploy on Vercel
+## Analyze
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+flutter analyze   # Should report 0 issues
+```

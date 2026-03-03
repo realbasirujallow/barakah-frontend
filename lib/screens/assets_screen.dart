@@ -48,6 +48,10 @@ class _AssetsScreenState extends State<AssetsScreen> {
   }
 
   Future<void> _deleteAsset(Asset asset) async {
+    final authService = context.read<AuthService>();
+    final apiService = ApiService(authService);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -67,21 +71,15 @@ class _AssetsScreenState extends State<AssetsScreen> {
     if (confirmed != true) return;
 
     try {
-      final authService = context.read<AuthService>();
-      final apiService = ApiService(authService);
       await apiService.deleteAsset(asset.id!);
       _loadAssets();
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Asset deleted'), backgroundColor: AppTheme.deepGreen),
-        );
-      }
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('Asset deleted'), backgroundColor: AppTheme.deepGreen),
+      );
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to delete asset'), backgroundColor: Colors.red),
-        );
-      }
+      scaffoldMessenger.showSnackBar(
+        const SnackBar(content: Text('Failed to delete asset'), backgroundColor: Colors.red),
+      );
     }
   }
 
@@ -201,7 +199,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: selectedType,
+                initialValue: selectedType,
                 decoration: InputDecoration(
                   labelText: 'Asset Type',
                   prefixIcon: const Icon(Icons.category_outlined),
@@ -217,7 +215,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.deepGreen.withOpacity(0.7),
+                        color: AppTheme.deepGreen.withValues(alpha: 0.7),
                       ),
                     ),
                   ),

@@ -93,7 +93,7 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
                     decoration: const InputDecoration(labelText: 'Amount', border: OutlineInputBorder(), prefixIcon: Icon(Icons.attach_money))),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: selectedCategory,
+                  initialValue: selectedCategory,
                   decoration: const InputDecoration(labelText: 'Category', border: OutlineInputBorder()),
                   items: _categories.map((c) => DropdownMenuItem(
                     value: c,
@@ -136,7 +136,7 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
                           description: descCtrl.text.isNotEmpty ? descCtrl.text : null,
                           anonymous: isAnonymous,
                         );
-                        if (mounted) Navigator.pop(ctx);
+                        if (ctx.mounted) Navigator.pop(ctx);
                         _loadDonations();
                         if (mounted && result['message'] != null) {
                           ScaffoldMessenger.of(context).showSnackBar(

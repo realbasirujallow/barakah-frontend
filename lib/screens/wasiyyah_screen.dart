@@ -132,7 +132,7 @@ class _WasiyyahScreenState extends State<WasiyyahScreen> {
                     decoration: const InputDecoration(labelText: 'Beneficiary Name', border: OutlineInputBorder(), prefixIcon: Icon(Icons.person))),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: selectedRelationship,
+                  initialValue: selectedRelationship,
                   decoration: const InputDecoration(labelText: 'Relationship', border: OutlineInputBorder()),
                   items: _relationships.map((r) => DropdownMenuItem(
                     value: r,
@@ -153,7 +153,7 @@ class _WasiyyahScreenState extends State<WasiyyahScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: shareType,
+                      initialValue: shareType,
                       decoration: const InputDecoration(labelText: 'Type', border: OutlineInputBorder()),
                       items: const [
                         DropdownMenuItem(value: 'fixed', child: Text('Fixed (Fard)')),
@@ -190,7 +190,7 @@ class _WasiyyahScreenState extends State<WasiyyahScreen> {
                           shareType: shareType,
                           assetDescription: assetCtrl.text.isNotEmpty ? assetCtrl.text : null,
                         );
-                        if (mounted) Navigator.pop(ctx);
+                        if (ctx.mounted) Navigator.pop(ctx);
                         _loadData();
                       } catch (e) {
                         if (mounted) {

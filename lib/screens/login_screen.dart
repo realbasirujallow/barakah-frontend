@@ -29,10 +29,11 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _checkBiometric() async {
+    final authService = Provider.of<AuthService>(context, listen: false);
     final bio = BiometricService();
     final available = await bio.isAvailable();
     final enabled = await bio.isEnabled();
-    final authService = Provider.of<AuthService>(context, listen: false);
+    if (!context.mounted) return;
     if (available && enabled && authService.isLoggedIn) {
       setState(() => _biometricAvailable = true);
       _tryBiometricLogin();
@@ -42,13 +43,16 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _tryBiometricLogin() async {
+    final auth = Provider.of<AuthService>(context, listen: false);
+    final navigator = Navigator.of(context);
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
+
     final bio = BiometricService();
     final authenticated = await bio.authenticate();
-    if (authenticated && mounted) {
-      final auth = Provider.of<AuthService>(context, listen: false);
+    if (authenticated && context.mounted) {
       // If already logged in, go to dashboard
       if (auth.isLoggedIn) {
-        Navigator.pushReplacementNamed(context, '/dashboard');
+        navigator.pushReplacementNamed('/dashboard');
         return;
       }
       // If not logged in, try to fetch saved session or prompt for email
@@ -64,9 +68,10 @@ class _LoginScreenState extends State<LoginScreen> {
           userName: userName ?? '',
           userEmail: email,
         );
-        Navigator.pushReplacementNamed(context, '/dashboard');
+        if (!context.mounted) return;
+        navigator.pushReplacementNamed('/dashboard');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
+        scaffoldMessenger.showSnackBar(
           const SnackBar(
             content: Text('No saved session found. Please login with email/password first.'),
             backgroundColor: Colors.red,

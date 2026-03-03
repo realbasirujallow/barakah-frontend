@@ -80,7 +80,7 @@ class _SharedFinancesScreenState extends State<SharedFinancesScreen> {
               ),
               const SizedBox(height: 16),
               DropdownButtonFormField<String>(
-                value: selectedType,
+                initialValue: selectedType,
                 decoration: InputDecoration(
                   labelText: 'Group Type',
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -522,7 +522,7 @@ class _GroupDetailScreenState extends State<_GroupDetailScreen> with SingleTicke
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: category,
+                  initialValue: category,
                   decoration: InputDecoration(
                     labelText: 'Category',
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
@@ -533,7 +533,7 @@ class _GroupDetailScreenState extends State<_GroupDetailScreen> with SingleTicke
                 ),
                 const SizedBox(height: 16),
                 DropdownButtonFormField<String>(
-                  value: splitType,
+                  initialValue: splitType,
                   decoration: InputDecoration(
                     labelText: 'Split Type',
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),

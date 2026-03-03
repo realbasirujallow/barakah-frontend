@@ -93,7 +93,7 @@ class _WaqfScreenState extends State<WaqfScreen> {
                 Row(children: [
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: selectedType,
+                      initialValue: selectedType,
                       decoration: const InputDecoration(labelText: 'Type', border: OutlineInputBorder()),
                       items: _types.map((t) => DropdownMenuItem(value: t,
                           child: Text(t[0].toUpperCase() + t.substring(1)))).toList(),
@@ -103,7 +103,7 @@ class _WaqfScreenState extends State<WaqfScreen> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: DropdownButtonFormField<String>(
-                      value: selectedPurpose,
+                      initialValue: selectedPurpose,
                       decoration: const InputDecoration(labelText: 'Purpose', border: OutlineInputBorder()),
                       items: _purposes.map((p) => DropdownMenuItem(
                         value: p,
@@ -136,7 +136,7 @@ class _WaqfScreenState extends State<WaqfScreen> {
                           purpose: selectedPurpose,
                           description: descCtrl.text.isNotEmpty ? descCtrl.text : null,
                         );
-                        if (mounted) Navigator.pop(ctx);
+                        if (ctx.mounted) Navigator.pop(ctx);
                         _loadContributions();
                         if (mounted && result['message'] != null) {
                           ScaffoldMessenger.of(context).showSnackBar(

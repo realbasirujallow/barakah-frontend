@@ -175,7 +175,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   const SizedBox(height: 16),
                   // State dropdown
                   DropdownButtonFormField<String>(
-                    value: _selectedState,
+                    initialValue: _selectedState,
                     decoration: InputDecoration(
                       labelText: 'State (for tax estimate)',
                       prefixIcon: const Icon(Icons.location_on_outlined),

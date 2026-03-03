@@ -1,5 +1,5 @@
 name: barakah_app
-description: "A new Flutter project."
+description: "Barakah — Islamic finance tracker for halal-conscious money management."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -69,6 +69,7 @@ dev_dependencies:
 # following page: https://dart.dev/tools/pub/pubspec
 
 # The following section is specific to Flutter packages.
+  image: any
 flutter:
 
   # The following line ensures that the Material Icons font is

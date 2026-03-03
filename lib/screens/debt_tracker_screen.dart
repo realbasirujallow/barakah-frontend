@@ -70,6 +70,7 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
     final rateCtrl = TextEditingController();
     final lenderCtrl = TextEditingController();
     bool isRibaFree = true;
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     showModalBottomSheet(
       context: context,
@@ -96,7 +97,7 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
                 ),
                 const SizedBox(height: 12),
                 DropdownButtonFormField<String>(
-                  value: selectedType,
+                  initialValue: selectedType,
                   decoration: const InputDecoration(labelText: 'Type', border: OutlineInputBorder()),
                   items: _types.map((t) => DropdownMenuItem(
                     value: t,
@@ -199,14 +200,12 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
                           ribaFree: isRibaFree,
                           lender: lenderCtrl.text.isNotEmpty ? lenderCtrl.text : null,
                         );
-                        if (mounted) Navigator.pop(ctx);
+                        if (ctx.mounted) Navigator.pop(ctx);
                         _loadDebts();
                       } catch (e) {
-                        if (mounted) {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text(ApiService.errorMessage(e)), backgroundColor: Colors.red),
-                          );
-                        }
+                        scaffoldMessenger.showSnackBar(
+                          SnackBar(content: Text(ApiService.errorMessage(e)), backgroundColor: Colors.red),
+                        );
                       }
                     },
                     style: ElevatedButton.styleFrom(
@@ -227,6 +226,7 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
 
   void _showPaymentDialog(Map<String, dynamic> debt) {
     final amountCtrl = TextEditingController();
+    final scaffoldMessenger = ScaffoldMessenger.of(context);
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -248,14 +248,12 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
               try {
                 final api = ApiService(context.read<AuthService>());
                 await api.makeDebtPayment(debt['id'] as int, double.parse(amountCtrl.text));
-                if (mounted) Navigator.pop(ctx);
+                if (ctx.mounted) Navigator.pop(ctx);
                 _loadDebts();
               } catch (e) {
-                if (mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(ApiService.errorMessage(e)), backgroundColor: Colors.red),
-                  );
-                }
+                scaffoldMessenger.showSnackBar(
+                  SnackBar(content: Text(ApiService.errorMessage(e)), backgroundColor: Colors.red),
+                );
               }
             },
             style: ElevatedButton.styleFrom(backgroundColor: AppTheme.deepGreen, foregroundColor: Colors.white),

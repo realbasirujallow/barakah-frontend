@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
-import 'package:barakah_app/models/asset.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
@@ -16,7 +15,6 @@ class ZakatScreen extends StatefulWidget {
 class _ZakatScreenState extends State<ZakatScreen> {
   static const double _nisabThreshold = 5686.20;
 
-  List<Asset> _assets = [];
   double _totalValue = 0;
   double _zakatableWealth = 0;
   double _nonZakatableWealth = 0;
@@ -43,11 +41,9 @@ class _ZakatScreenState extends State<ZakatScreen> {
         apiService.getAssetTotal(),
       ]);
 
-      final assets = results[0] as List<Asset>;
       final totals = results[1] as Map<String, dynamic>;
 
       setState(() {
-        _assets = assets;
         _totalValue = (totals['totalWealth'] as num?)?.toDouble() ?? 0;
         _zakatableWealth = (totals['zakatableWealth'] as num?)?.toDouble() ?? 0;
         _nonZakatableWealth = (totals['nonZakatableWealth'] as num?)?.toDouble() ?? 0;
