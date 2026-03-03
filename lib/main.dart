@@ -113,7 +113,7 @@ class BarakahApp extends StatelessWidget {
               '/shared-finances': (context) => const SharedFinancesScreen(),
               '/investments': (context) => const InvestmentsScreen(),
               '/credit-score': (context) => const CreditScoreScreen(),
-              '/monarch-import': (context) => const MonarchImportScreen(),
+              '/import': (context) => const MonarchImportScreen(),
             },
           );
         },
