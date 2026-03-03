@@ -22,6 +22,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   List<Asset> _assets = [];
   double _totalValue = 0;
   double _zakatAmount = 0;
+  double _nisabThreshold = 5686.20;
   bool _zakatDue = false;
   bool _isLoading = true;
   String? _error;
@@ -149,6 +150,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         _totalValue = (totals['netWorth'] as num?)?.toDouble() ?? 0;
         _zakatAmount = (totals['zakatDue'] as num?)?.toDouble() ?? 0;
         _zakatDue = totals['zakatEligible'] as bool? ?? false;
+        _nisabThreshold = (totals['nisab'] as num?)?.toDouble() ?? 5686.20;
         _isLoading = false;
       });
 
@@ -167,6 +169,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           _totalValue = (cachedTotal?['netWorth'] as num?)?.toDouble() ?? 0;
           _zakatAmount = (cachedTotal?['zakatDue'] as num?)?.toDouble() ?? 0;
           _zakatDue = cachedTotal?['zakatEligible'] as bool? ?? false;
+          _nisabThreshold = (cachedTotal?['nisab'] as num?)?.toDouble() ?? 5686.20;
           _isLoading = false;
           _error = null;
         });
@@ -263,6 +266,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         totalValue: _totalValue,
                         zakatAmount: _zakatAmount,
                         zakatDue: _zakatDue,
+                        nisabThreshold: _nisabThreshold,
                       ),
                       const SizedBox(height: 16),
                       Row(

@@ -6,14 +6,14 @@ class ZakatIndicator extends StatelessWidget {
   final double totalValue;
   final double zakatAmount;
   final bool zakatDue;
-
-  static const double nisabThreshold = 5686.20;
+  final double nisabThreshold;
 
   const ZakatIndicator({
     super.key,
     required this.totalValue,
     required this.zakatAmount,
     required this.zakatDue,
+    this.nisabThreshold = 5686.20, // fallback; live value from API preferred
   });
 
   @override

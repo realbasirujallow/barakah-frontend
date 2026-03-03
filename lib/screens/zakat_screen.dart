@@ -13,7 +13,7 @@ class ZakatScreen extends StatefulWidget {
 }
 
 class _ZakatScreenState extends State<ZakatScreen> with SingleTickerProviderStateMixin {
-  static const double _nisabThreshold = 5686.20;
+  double _nisabThreshold = 5686.20; // fallback; overwritten by live API value
   static const int _currentLunarYear = 1446; // Update yearly
 
   double _totalValue = 0;
@@ -55,6 +55,7 @@ class _ZakatScreenState extends State<ZakatScreen> with SingleTickerProviderStat
       final paymentsData = results[2] as Map<String, dynamic>;
 
       setState(() {
+        _nisabThreshold = (totals['nisab'] as num?)?.toDouble() ?? 5686.20;
         _totalValue = (totals['netWorth'] as num?)?.toDouble() ?? (totals['totalWealth'] as num?)?.toDouble() ?? 0;
         _zakatableWealth = (totals['zakatableWealth'] as num?)?.toDouble() ?? 0;
         _nonZakatableWealth = (totals['nonZakatableWealth'] as num?)?.toDouble() ?? 0;
