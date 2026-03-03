@@ -107,7 +107,9 @@ class _AssetsScreenState extends State<AssetsScreen> {
     }
   }
 
-  static const _retirementTypes = ['401k', 'roth_ira', 'ira', 'hsa', '403b', 'pension', '529'];
+  static const _retirementTypes = ['401k', 'roth_ira', 'ira', 'hsa', '403b', 'pension'];
+  static const _educationTypes = ['529', '529_plan', 'education_savings'];
+  static const _penaltyTaxTypes = [..._retirementTypes, ..._educationTypes];
 
   void _showAddAssetDialog() {
     final theme = Theme.of(context);
@@ -121,7 +123,8 @@ class _AssetsScreenState extends State<AssetsScreen> {
       '💵 Cash & Savings': ['cash', 'savings_account', 'checking_account'],
       '🏠 Real Estate': ['primary_home', 'investment_property'],
       '📈 Investments': ['stock', 'crypto', 'business', 'individual_brokerage'], // Added individual brokerage
-      '🏦 Retirement': ['401k', 'roth_ira', 'ira', 'hsa', '403b', 'pension', '529'],
+      '🏦 Retirement': ['401k', 'roth_ira', 'ira', 'hsa', '403b', 'pension'],
+      '🎓 Education': ['529'],
       '🥇 Precious Metals': ['gold', 'silver'],
       '🚗 Other': ['vehicle', 'other'],
     };
@@ -249,14 +252,14 @@ class _AssetsScreenState extends State<AssetsScreen> {
                 ),
               ),
               // Penalty/Tax rate fields for retirement types
-              if (_retirementTypes.contains(selectedType)) ...[
+              if (_penaltyTaxTypes.contains(selectedType)) ...[
                 const SizedBox(height: 16),
                 TextField(
                   controller: penaltyController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   decoration: InputDecoration(
-                    labelText: selectedType == 'ira' ? 'Early Withdrawal Penalty (%)' : 'Penalty Rate (%)',
-                    hintText: selectedType == 'ira' ? '0' : '10',
+                    labelText: (selectedType == 'ira' || _educationTypes.contains(selectedType)) ? 'Early Withdrawal Penalty (%)' : 'Penalty Rate (%)',
+                    hintText: (selectedType == 'ira' || _educationTypes.contains(selectedType)) ? '0' : '10',
                     prefixIcon: const Icon(Icons.percent),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     filled: true, fillColor: theme.colorScheme.surfaceContainerLowest,
@@ -267,8 +270,8 @@ class _AssetsScreenState extends State<AssetsScreen> {
                   controller: taxController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
                   decoration: InputDecoration(
-                    labelText: selectedType == 'ira' ? 'State Tax Rate (%)' : 'Tax Rate (%)',
-                    hintText: selectedType == 'ira' ? '0' : '25',
+                    labelText: (selectedType == 'ira' || _educationTypes.contains(selectedType)) ? 'Tax Rate (%)' : 'Tax Rate (%)',
+                    hintText: (selectedType == 'ira' || _educationTypes.contains(selectedType)) ? '0' : '25',
                     prefixIcon: const Icon(Icons.account_balance),
                     border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
                     filled: true, fillColor: theme.colorScheme.surfaceContainerLowest,
@@ -276,9 +279,11 @@ class _AssetsScreenState extends State<AssetsScreen> {
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  selectedType == 'ira'
-                      ? 'IRAs are tax-exempt by default. Add your state tax rate if applicable. States like TX, FL, NV, WA have no state income tax.'
-                      : 'Defaults: 10% penalty, 22% federal + state tax. Adjust for your situation.',
+                  _educationTypes.contains(selectedType)
+                      ? '529 education accounts: qualified withdrawals are tax-free & penalty-free. Fully zakatable by default (0% penalty, 0% tax).'
+                      : selectedType == 'ira'
+                          ? 'IRAs are tax-exempt by default. Add your state tax rate if applicable. States like TX, FL, NV, WA have no state income tax.'
+                          : 'Defaults: 10% penalty, 22% federal + state tax. Adjust for your situation.',
                   style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
                 ),
               ],
@@ -309,8 +314,8 @@ class _AssetsScreenState extends State<AssetsScreen> {
                         name: name,
                         type: selectedType,
                         value: value,
-                        penaltyRate: (_retirementTypes.contains(selectedType) && penaltyVal != null) ? penaltyVal / 100 : null,
-                        taxRate: (_retirementTypes.contains(selectedType) && taxVal != null) ? taxVal / 100 : null,
+                      penaltyRate: (_penaltyTaxTypes.contains(selectedType) && penaltyVal != null) ? penaltyVal / 100 : null,
+                      taxRate: (_penaltyTaxTypes.contains(selectedType) && taxVal != null) ? taxVal / 100 : null,
                       ));
                       _loadAssets();
                       if (mounted) {
