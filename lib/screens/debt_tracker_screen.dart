@@ -54,6 +54,11 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ApiService.errorMessage(e)), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -199,7 +204,7 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
                       } catch (e) {
                         if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+                            SnackBar(content: Text(ApiService.errorMessage(e)), backgroundColor: Colors.red),
                           );
                         }
                       }
@@ -248,7 +253,7 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
               } catch (e) {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
+                    SnackBar(content: Text(ApiService.errorMessage(e)), backgroundColor: Colors.red),
                   );
                 }
               }

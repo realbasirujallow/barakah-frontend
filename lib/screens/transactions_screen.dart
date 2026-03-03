@@ -42,6 +42,11 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ApiService.errorMessage(e)), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 
@@ -66,7 +71,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
       final authService = context.read<AuthService>();
       await ApiService(authService).deleteTransaction(t.id!);
       _loadData();
-    } catch (_) {}
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ApiService.errorMessage(e)), backgroundColor: Colors.red),
+        );
+      }
+    }
   }
 
   void _showAddTransactionDialog() {
@@ -258,7 +269,13 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                           frequency: isRecurring ? frequency : null,
                         ));
                         _loadData();
-                      } catch (_) {}
+                      } catch (e) {
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text(ApiService.errorMessage(e)), backgroundColor: Colors.red),
+                          );
+                        }
+                      }
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: type == 'income' ? Colors.green : Colors.red,

@@ -49,6 +49,11 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
       });
     } catch (e) {
       setState(() => _loading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(ApiService.errorMessage(e)), backgroundColor: Colors.red),
+        );
+      }
     }
   }
 

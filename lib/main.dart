@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:barakah_app/services/auth_service.dart';
@@ -35,12 +36,26 @@ import 'package:barakah_app/services/notification_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Global error handler for Flutter framework errors (layout, rendering, etc.)
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint('Flutter error: ${details.exception}');
+  };
+
   final authService = AuthService();
   await authService.init();
   final showOnboarding = await OnboardingScreen.shouldShow();
   // Initialize notifications
   await NotificationService().init();
-  runApp(BarakahApp(authService: authService, showOnboarding: showOnboarding));
+
+  // Catch unhandled async errors so they don't crash the app silently
+  runZonedGuarded(
+    () => runApp(BarakahApp(authService: authService, showOnboarding: showOnboarding)),
+    (error, stackTrace) {
+      debugPrint('Unhandled error: $error\n$stackTrace');
+    },
+  );
 }
 
 class BarakahApp extends StatelessWidget {

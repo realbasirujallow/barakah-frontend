@@ -1,11 +1,27 @@
 import 'package:dio/dio.dart';
+import 'dart:convert';
 import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/models/asset.dart';
 import 'package:barakah_app/models/price.dart';
 import 'package:barakah_app/models/transaction.dart';
 
+/// User-friendly exception thrown by [ApiService].
+/// Screens can catch this and display [message] directly in a SnackBar.
+class AppException implements Exception {
+  final String message;
+  final int? statusCode;
+  AppException(this.message, {this.statusCode});
+
+  @override
+  String toString() => message;
+}
+
 class ApiService {
-  static const String baseUrl = 'https://api.trybarakah.com';
+  // Override at build time:  flutter build apk --dart-define=API_URL=http://192.168.1.x:8080
+  static const String baseUrl = String.fromEnvironment(
+    'API_URL',
+    defaultValue: 'https://api.trybarakah.com',
+  );
 
   late final Dio _dio;
   final AuthService _authService;
@@ -13,10 +29,14 @@ class ApiService {
   ApiService(this._authService) {
     _dio = Dio(BaseOptions(
       baseUrl: baseUrl,
-      connectTimeout: const Duration(seconds: 15),
-      receiveTimeout: const Duration(seconds: 15),
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 10),
       headers: {
         'Content-Type': 'application/json',
+        'Accept': 'application/json; charset=utf-8',
+      },
+      responseDecoder: (responseBytes, options, responseBody) {
+        return utf8.decode(responseBytes);
       },
     ));
 
@@ -28,13 +48,66 @@ class ApiService {
         }
         return handler.next(options);
       },
-      onError: (error, handler) {
-        if (error.response?.statusCode == 401) {
+      onError: (DioException e, handler) {
+        // Convert DioException to user-friendly AppException
+        final response = e.response;
+
+        // Handle 401 — token expired / invalid
+        if (response?.statusCode == 401) {
           _authService.logout();
+          return handler.reject(DioException(
+            requestOptions: e.requestOptions,
+            error: AppException('Session expired. Please log in again.', statusCode: 401),
+          ));
         }
-        return handler.next(error);
+
+        // Extract server error message if available
+        if (response?.data is Map) {
+          final data = response!.data as Map;
+          final serverMsg = data['error'] ?? data['message'];
+          if (serverMsg != null && serverMsg.toString().isNotEmpty) {
+            return handler.reject(DioException(
+              requestOptions: e.requestOptions,
+              error: AppException(serverMsg.toString(), statusCode: response.statusCode),
+            ));
+          }
+        }
+
+        // Map common network errors
+        String message;
+        switch (e.type) {
+          case DioExceptionType.connectionTimeout:
+          case DioExceptionType.receiveTimeout:
+          case DioExceptionType.sendTimeout:
+            message = 'Server is taking too long. Please try again.';
+            break;
+          case DioExceptionType.connectionError:
+          case DioExceptionType.unknown:
+            message = 'No connection to server. Check your internet.';
+            break;
+          default:
+            message = 'Something went wrong. Please try again.';
+        }
+
+        return handler.reject(DioException(
+          requestOptions: e.requestOptions,
+          error: AppException(message, statusCode: response?.statusCode),
+        ));
       },
     ));
+  }
+
+  /// Extract user-friendly error message from any exception.
+  /// Use in catch blocks: `catch (e) { showSnackBar(ApiService.errorMessage(e)); }`
+  static String errorMessage(Object error) {
+    if (error is AppException) return error.message;
+    if (error is DioException && error.error is AppException) {
+      return (error.error as AppException).message;
+    }
+    if (error is DioException) return 'Something went wrong. Please try again.';
+    final msg = error.toString();
+    if (msg.startsWith('Exception: ')) return msg.substring(11);
+    return msg;
   }
 
   // ─── Auth ────────────────────────────────────────────
