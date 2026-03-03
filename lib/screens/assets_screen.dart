@@ -121,7 +121,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
 
     final types = {
       '💵 Cash & Savings': ['cash', 'savings_account', 'checking_account'],
-      '🏠 Real Estate': ['primary_home', 'investment_property'],
+      '🏠 Real Estate': ['primary_home', 'investment_property', 'investment_property_resale'],
       '📈 Investments': ['stock', 'crypto', 'business', 'individual_brokerage'], // Added individual brokerage
       '🏦 Retirement': ['401k', 'roth_ira', 'ira', 'hsa', '403b', 'pension'],
       '🎓 Education': ['529'],
@@ -135,7 +135,8 @@ class _AssetsScreenState extends State<AssetsScreen> {
         'savings_account': 'Savings Account',
         'checking_account': 'Checking Account',
         'primary_home': 'Primary Home',
-        'investment_property': 'Investment Property',
+        'investment_property': 'Investment Property (Rental)',
+        'investment_property_resale': 'Investment Property (For Resale)',
         'stock': 'Stocks / ETFs',
         'crypto': 'Cryptocurrency',
         'business': 'Business',
