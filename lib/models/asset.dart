@@ -4,6 +4,8 @@ class Asset {
   final String type;
   final double value;
   final String? userId;
+  final double? penaltyRate;
+  final double? taxRate;
 
   Asset({
     this.id,
@@ -11,6 +13,8 @@ class Asset {
     required this.type,
     required this.value,
     this.userId,
+    this.penaltyRate,
+    this.taxRate,
   });
 
   factory Asset.fromJson(Map<String, dynamic> json) {
@@ -20,6 +24,8 @@ class Asset {
       type: json['type'] as String,
       value: (json['value'] as num).toDouble(),
       userId: json['userId'] as String?,
+      penaltyRate: (json['penaltyRate'] as num?)?.toDouble(),
+      taxRate: (json['taxRate'] as num?)?.toDouble(),
     );
   }
 
@@ -30,6 +36,8 @@ class Asset {
       'type': type,
       'value': value,
       if (userId != null) 'userId': userId,
+      if (penaltyRate != null) 'penaltyRate': penaltyRate,
+      if (taxRate != null) 'taxRate': taxRate,
     };
   }
 
@@ -39,6 +47,8 @@ class Asset {
     String? type,
     double? value,
     String? userId,
+    double? penaltyRate,
+    double? taxRate,
   }) {
     return Asset(
       id: id ?? this.id,
@@ -46,6 +56,8 @@ class Asset {
       type: type ?? this.type,
       value: value ?? this.value,
       userId: userId ?? this.userId,
+      penaltyRate: penaltyRate ?? this.penaltyRate,
+      taxRate: taxRate ?? this.taxRate,
     );
   }
 
