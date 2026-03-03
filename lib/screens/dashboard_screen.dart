@@ -181,9 +181,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-      final prefs = SharedPreferences.getInstance();
-      bool hideNetWorth = false;
-      prefs.then((p) => hideNetWorth = p.getBool('hide_net_worth') ?? false);
     final theme = Theme.of(context);
     final authService = context.watch<AuthService>();
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
@@ -228,32 +225,70 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ? Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    body: _isLoading
-                        ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
-                        : _error != null
-                            ? Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
-                                    const SizedBox(height: 16),
-                                    Text(_error!, style: TextStyle(color: Colors.red[700])),
-                                    const SizedBox(height: 16),
-                                    ElevatedButton(
-                                      onPressed: _loadData,
-                                      child: const Text('Retry'),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : RefreshIndicator(
-                                onRefresh: _loadData,
-                                color: AppTheme.deepGreen,
-                                child: ListView(
-                                  padding: const EdgeInsets.all(16),
-                                  children: [
-                                    // ...existing code...
-                                    // ...existing code...
+                    children: [
+                      Icon(Icons.error_outline, size: 48, color: Colors.red[300]),
+                      const SizedBox(height: 16),
+                      Text(_error!, style: TextStyle(color: Colors.red[700])),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _loadData,
+                        child: const Text('Retry'),
+                      ),
+                    ],
+                  ),
+                )
+              : RefreshIndicator(
+                  onRefresh: _loadData,
+                  color: AppTheme.deepGreen,
+                  child: ListView(
+                    padding: const EdgeInsets.all(16),
+                    children: [
+                      // Net Worth Card
+                      Card(
+                        color: AppTheme.deepGreen,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                        child: Padding(
+                          padding: const EdgeInsets.all(24),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              const Text('Net Worth', style: TextStyle(color: Colors.white, fontSize: 16)),
+                              const SizedBox(height: 8),
+                              Text(currencyFormat.format(_totalValue), style: const TextStyle(color: Colors.white, fontSize: 28, fontWeight: FontWeight.bold)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      ZakatIndicator(
+                        totalValue: _totalValue,
+                        zakatAmount: _zakatAmount,
+                        zakatDue: _zakatDue,
+                      ),
+                      const SizedBox(height: 16),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          const Text('Quick Actions', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.deepGreen)),
+                          TextButton.icon(
+                            onPressed: () {
+                              setState(() => _isEditingGrid = !_isEditingGrid);
+                              if (!_isEditingGrid) _saveQuickActionOrder();
+                            },
+                            icon: Icon(_isEditingGrid ? Icons.check : Icons.edit, size: 18),
+                            label: Text(_isEditingGrid ? 'Done' : 'Edit'),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 8),
+                      _isEditingGrid ? _buildReorderableGrid() : _buildQuickActionsGrid(),
+                      const SizedBox(height: 16),
+                      const Text('Assets', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.deepGreen)),
+                      const SizedBox(height: 8),
+                      ..._assets.map((asset) => AssetCard(asset: asset)),
+                    ],
+                  ),
+                ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: 0,
         selectedItemColor: AppTheme.deepGreen,
