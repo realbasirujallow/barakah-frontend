@@ -929,4 +929,28 @@ class ApiService {
     final response = await _dio.get('/api/credit-score/simulate', queryParameters: params);
     return response.data as Map<String, dynamic>;
   }
+
+  // ─── Import (Monarch Money) ──────────────────────────────────────────────
+
+  /// Upload a Monarch Money Balances CSV for preview.
+  Future<Map<String, dynamic>> monarchPreview(String filePath) async {
+    final formData = FormData.fromMap({
+      'file': await MultipartFile.fromFile(filePath, filename: 'balances.csv'),
+    });
+    final response = await _dio.post(
+      '/api/import/monarch/preview',
+      data: formData,
+      options: Options(contentType: 'multipart/form-data'),
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  /// Execute the Monarch import with the user-confirmed account selections.
+  Future<Map<String, dynamic>> monarchExecute(List<Map<String, dynamic>> accounts) async {
+    final response = await _dio.post(
+      '/api/import/monarch/execute',
+      data: {'accounts': accounts},
+    );
+    return response.data as Map<String, dynamic>;
+  }
 }
