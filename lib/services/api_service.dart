@@ -130,6 +130,13 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
+  Future<Map<String, dynamic>> resendVerification(String email) async {
+    final response = await _dio.post('/auth/resend-verification', data: {
+      'email': email,
+    });
+    return response.data as Map<String, dynamic>;
+  }
+
   // ─── Assets ──────────────────────────────────────────
 
   Future<List<Asset>> getAssets() async {
@@ -422,6 +429,27 @@ class ApiService {
     await _dio.delete('/api/debts/$id');
   }
 
+  Future<Map<String, dynamic>> updateDebt(int id, {
+    required String name,
+    required String type,
+    required double totalAmount,
+    double? monthlyPayment,
+    double? interestRate,
+    bool? ribaFree,
+    String? lender,
+  }) async {
+    final response = await _dio.put('/api/debts/$id', data: {
+      'name': name,
+      'type': type,
+      'totalAmount': totalAmount,
+      if (monthlyPayment != null) 'monthlyPayment': monthlyPayment,
+      if (interestRate != null) 'interestRate': interestRate,
+      if (ribaFree != null) 'ribaFree': ribaFree,
+      if (lender != null) 'lender': lender,
+    });
+    return response.data as Map<String, dynamic>;
+  }
+
   // ─── Bills ───────────────────────────────────────────
 
   Future<Map<String, dynamic>> getBills({bool? paid}) async {
@@ -611,6 +639,27 @@ class ApiService {
     await _dio.delete('/api/waqf/$id');
   }
 
+  Future<Map<String, dynamic>> updateWaqf(int id, {
+    String? organizationName,
+    double? amount,
+    String? type,
+    String? purpose,
+    String? description,
+    bool? recurring,
+    String? frequency,
+  }) async {
+    final data = <String, dynamic>{};
+    if (organizationName != null) data['organizationName'] = organizationName;
+    if (amount != null) data['amount'] = amount;
+    if (type != null) data['type'] = type;
+    if (purpose != null) data['purpose'] = purpose;
+    if (description != null) data['description'] = description;
+    if (recurring != null) data['recurring'] = recurring;
+    if (frequency != null) data['frequency'] = frequency;
+    final response = await _dio.put('/api/waqf/$id', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
   // ─── Riba Detector ──────────────────────────────────
 
   Future<Map<String, dynamic>> scanForRiba() async {
@@ -748,6 +797,37 @@ class ApiService {
   Future<Map<String, dynamic>> removeSharedGroupMember(int groupId, int memberId) async {
     final response = await _dio.delete('/api/shared/groups/$groupId/members/$memberId');
     return response.data as Map<String, dynamic>;
+  }
+
+  // ─── Zakat Payments ─────────────────────────────────
+
+  Future<Map<String, dynamic>> getZakatPayments({int? lunarYear}) async {
+    final params = <String, dynamic>{};
+    if (lunarYear != null) params['lunarYear'] = lunarYear;
+    final response = await _dio.get('/api/zakat/payments', queryParameters: params);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> addZakatPayment({
+    required double amount,
+    String? recipient,
+    String? notes,
+    int? lunarYear,
+    int? paidAt,
+  }) async {
+    final data = <String, dynamic>{
+      'amount': amount,
+    };
+    if (recipient != null) data['recipient'] = recipient;
+    if (notes != null) data['notes'] = notes;
+    if (lunarYear != null) data['lunarYear'] = lunarYear;
+    if (paidAt != null) data['paidAt'] = paidAt;
+    final response = await _dio.post('/api/zakat/payments', data: data);
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<void> deleteZakatPayment(int id) async {
+    await _dio.delete('/api/zakat/payments/$id');
   }
 
   // ─── Investment Accounts ────────────────────────────
