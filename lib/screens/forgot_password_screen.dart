@@ -17,9 +17,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
   final _newPasswordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   bool _loading = false;
-  bool _tokenSent = false;
+  // 0 = enter email, 1 = email sent (check inbox), 2 = enter token + new password
+  int _step = 0;
   String? _error;
-  String? _success;
 
   @override
   void dispose() {
@@ -39,17 +39,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     setState(() { _loading = true; _error = null; });
     try {
       final api = ApiService(Provider.of<AuthService>(context, listen: false));
-      final result = await api.forgotPassword(_emailController.text.trim());
-      setState(() {
-        _tokenSent = true;
-        _success = 'Reset token sent! Check the response below.';
-        // In production this would come via email
-        if (result['resetToken'] != null) {
-          _tokenController.text = result['resetToken'].toString();
-        }
-      });
+      await api.forgotPassword(_emailController.text.trim());
+      setState(() => _step = 1);
     } catch (e) {
-      setState(() => _error = 'Failed to send reset request');
+      setState(() => _error = 'Failed to send reset request. Please try again.');
     } finally {
       setState(() => _loading = false);
     }
@@ -57,11 +50,11 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   Future<void> _resetPassword() async {
     if (_tokenController.text.isEmpty) {
-      setState(() => _error = 'Please enter the reset token');
+      setState(() => _error = 'Please enter the reset token from your email');
       return;
     }
-    if (_newPasswordController.text.length < 6) {
-      setState(() => _error = 'Password must be at least 6 characters');
+    if (_newPasswordController.text.length < 8) {
+      setState(() => _error = 'Password must be at least 8 characters');
       return;
     }
     if (_newPasswordController.text != _confirmPasswordController.text) {
@@ -80,7 +73,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         Navigator.pop(context);
       }
     } catch (e) {
-      setState(() => _error = 'Invalid or expired reset token');
+      setState(() => _error = 'Invalid or expired reset token. Please request a new one.');
     } finally {
       setState(() => _loading = false);
     }
@@ -97,21 +90,23 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Icon(
-              Icons.lock_reset,
+              _step == 1 ? Icons.mark_email_read_outlined : Icons.lock_reset,
               size: 80,
               color: AppTheme.deepGreen.withAlpha(180),
             ),
             const SizedBox(height: 16),
             Text(
-              _tokenSent ? 'Enter Reset Token' : 'Forgot Password?',
+              _step == 0 ? 'Forgot Password?' : _step == 1 ? 'Check Your Email' : 'Create New Password',
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              _tokenSent
-                  ? 'Enter the token and your new password below.'
-                  : 'Enter your email to receive a password reset token.',
+              _step == 0
+                  ? 'Enter your email and we\'ll send you a reset link.'
+                  : _step == 1
+                      ? 'We sent a password reset link to ${_emailController.text}. Check your inbox and spam folder.'
+                      : 'Enter the token from your email and your new password.',
               style: TextStyle(color: theme.colorScheme.onSurfaceVariant, fontSize: 14),
               textAlign: TextAlign.center,
             ),
@@ -128,18 +123,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 child: Text(_error!, style: const TextStyle(color: Colors.red)),
               ),
 
-            if (_success != null && !_tokenSent == false)
-              Container(
-                padding: const EdgeInsets.all(12),
-                margin: const EdgeInsets.only(bottom: 16),
-                decoration: BoxDecoration(
-                  color: AppTheme.deepGreen.withAlpha(20),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(_success!, style: const TextStyle(color: AppTheme.deepGreen)),
-              ),
-
-            if (!_tokenSent) ...[
+            // Step 0: Enter email
+            if (_step == 0) ...[
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -160,13 +145,53 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ),
                 child: _loading
                     ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2))
-                    : const Text('Send Reset Token', style: TextStyle(fontSize: 16)),
+                    : const Text('Send Reset Link', style: TextStyle(fontSize: 16)),
               ),
-            ] else ...[
+            ],
+
+            // Step 1: Email sent — check inbox
+            if (_step == 1) ...[
+              Container(
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: AppTheme.deepGreen.withAlpha(15),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppTheme.deepGreen.withAlpha(40)),
+                ),
+                child: const Column(
+                  children: [
+                    Text('The reset link expires in 30 minutes.',
+                      style: TextStyle(fontSize: 13, color: Colors.grey),
+                      textAlign: TextAlign.center,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () => setState(() { _step = 2; _error = null; }),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppTheme.deepGreen,
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                ),
+                child: const Text('I Have the Token', style: TextStyle(fontSize: 16)),
+              ),
+              const SizedBox(height: 12),
+              TextButton(
+                onPressed: _loading ? null : _requestReset,
+                child: const Text('Resend Email'),
+              ),
+            ],
+
+            // Step 2: Enter token + new password
+            if (_step == 2) ...[
               TextField(
                 controller: _tokenController,
                 decoration: InputDecoration(
-                  labelText: 'Reset Token',
+                  labelText: 'Reset Token (from email)',
+                  hintText: 'Paste the token from your email',
                   prefixIcon: const Icon(Icons.key),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                 ),
@@ -177,6 +202,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 obscureText: true,
                 decoration: InputDecoration(
                   labelText: 'New Password',
+                  hintText: 'At least 8 characters',
                   prefixIcon: const Icon(Icons.lock_outline),
                   border: OutlineInputBorder(borderRadius: BorderRadius.circular(14)),
                 ),
@@ -206,7 +232,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
               ),
               const SizedBox(height: 12),
               TextButton(
-                onPressed: () => setState(() { _tokenSent = false; _error = null; }),
+                onPressed: () => setState(() { _step = 0; _error = null; }),
                 child: const Text('Request a new token'),
               ),
             ],
