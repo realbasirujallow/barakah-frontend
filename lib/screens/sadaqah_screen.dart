@@ -127,10 +127,15 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (amountCtrl.text.isEmpty) return;
+                      final amount = double.tryParse(amountCtrl.text);
+                      if (amount == null) {
+                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid amount'), backgroundColor: Colors.red));
+                        return;
+                      }
                       try {
                         final api = ApiService(context.read<AuthService>());
                         final result = await api.addSadaqah(
-                          amount: double.parse(amountCtrl.text),
+                          amount: amount,
                           category: selectedCategory,
                           recipientName: recipientCtrl.text.isNotEmpty ? recipientCtrl.text : null,
                           description: descCtrl.text.isNotEmpty ? descCtrl.text : null,

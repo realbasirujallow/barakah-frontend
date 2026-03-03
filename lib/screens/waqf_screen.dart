@@ -127,11 +127,16 @@ class _WaqfScreenState extends State<WaqfScreen> {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (orgCtrl.text.isEmpty || amountCtrl.text.isEmpty) return;
+                      final amount = double.tryParse(amountCtrl.text);
+                      if (amount == null) {
+                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid amount'), backgroundColor: Colors.red));
+                        return;
+                      }
                       try {
                         final api = ApiService(context.read<AuthService>());
                         final result = await api.addWaqf(
                           organizationName: orgCtrl.text,
-                          amount: double.parse(amountCtrl.text),
+                          amount: amount,
                           type: selectedType,
                           purpose: selectedPurpose,
                           description: descCtrl.text.isNotEmpty ? descCtrl.text : null,

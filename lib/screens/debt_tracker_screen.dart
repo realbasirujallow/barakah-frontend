@@ -189,14 +189,19 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (nameCtrl.text.isEmpty || totalCtrl.text.isEmpty) return;
+                      final totalAmt = double.tryParse(totalCtrl.text);
+                      if (totalAmt == null) {
+                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid amount'), backgroundColor: Colors.red));
+                        return;
+                      }
                       try {
                         final api = ApiService(context.read<AuthService>());
                         await api.addDebt(
                           name: nameCtrl.text,
                           type: selectedType,
-                          totalAmount: double.parse(totalCtrl.text),
-                          monthlyPayment: monthlyCtrl.text.isNotEmpty ? double.parse(monthlyCtrl.text) : null,
-                          interestRate: rateCtrl.text.isNotEmpty ? double.parse(rateCtrl.text) : null,
+                          totalAmount: totalAmt,
+                          monthlyPayment: monthlyCtrl.text.isNotEmpty ? double.tryParse(monthlyCtrl.text) : null,
+                          interestRate: rateCtrl.text.isNotEmpty ? double.tryParse(rateCtrl.text) : null,
                           ribaFree: isRibaFree,
                           lender: lenderCtrl.text.isNotEmpty ? lenderCtrl.text : null,
                         );
@@ -245,9 +250,14 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
           ElevatedButton(
             onPressed: () async {
               if (amountCtrl.text.isEmpty) return;
+              final payAmt = double.tryParse(amountCtrl.text);
+              if (payAmt == null) {
+                if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid amount'), backgroundColor: Colors.red));
+                return;
+              }
               try {
                 final api = ApiService(context.read<AuthService>());
-                await api.makeDebtPayment(debt['id'] as int, double.parse(amountCtrl.text));
+                await api.makeDebtPayment(debt['id'] as int, payAmt);
                 if (ctx.mounted) Navigator.pop(ctx);
                 _loadDebts();
               } catch (e) {

@@ -181,12 +181,17 @@ class _WasiyyahScreenState extends State<WasiyyahScreen> {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (nameCtrl.text.isEmpty || shareCtrl.text.isEmpty) return;
+                      final share = double.tryParse(shareCtrl.text);
+                      if (share == null) {
+                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid share percentage'), backgroundColor: Colors.red));
+                        return;
+                      }
                       try {
                         final api = ApiService(context.read<AuthService>());
                         await api.addWasiyyahBeneficiary(
                           beneficiaryName: nameCtrl.text,
                           relationship: selectedRelationship,
-                          sharePercentage: double.parse(shareCtrl.text),
+                          sharePercentage: share,
                           shareType: shareType,
                           assetDescription: assetCtrl.text.isNotEmpty ? assetCtrl.text : null,
                         );

@@ -128,12 +128,18 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
                   child: ElevatedButton(
                     onPressed: () async {
                       if (nameCtrl.text.isEmpty || amountCtrl.text.isEmpty || dueDayCtrl.text.isEmpty) return;
+                      final amount = double.tryParse(amountCtrl.text);
+                      final dueDay = int.tryParse(dueDayCtrl.text);
+                      if (amount == null || dueDay == null) {
+                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter valid numbers'), backgroundColor: Colors.red));
+                        return;
+                      }
                       try {
                         final api = ApiService(context.read<AuthService>());
                         await api.addBill(
                           name: nameCtrl.text,
-                          amount: double.parse(amountCtrl.text),
-                          dueDay: int.parse(dueDayCtrl.text),
+                          amount: amount,
+                          dueDay: dueDay,
                           category: selectedCategory,
                           frequency: frequency,
                         );

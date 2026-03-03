@@ -129,11 +129,16 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
                   child: ElevatedButton(
                     onPressed: () async {
                       if (nameCtrl.text.isEmpty || amountCtrl.text.isEmpty) return;
+                      final amount = double.tryParse(amountCtrl.text);
+                      if (amount == null) {
+                        if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please enter a valid amount'), backgroundColor: Colors.red));
+                        return;
+                      }
                       try {
                         final api = ApiService(context.read<AuthService>());
                         await api.addHawlTracker(
                           assetName: nameCtrl.text,
-                          amount: double.parse(amountCtrl.text),
+                          amount: amount,
                           assetType: selectedType,
                           notes: notesCtrl.text.isNotEmpty ? notesCtrl.text : null,
                         );
