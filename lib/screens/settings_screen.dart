@@ -322,6 +322,12 @@ class _SettingsScreenState extends State<SettingsScreen> {
           // Data
           _sectionHeader('Data'),
           _settingsTile(
+            icon: Icons.upload_file,
+            title: 'Import from Monarch Money',
+            subtitle: 'Import balances CSV as assets & debts',
+            onTap: () => Navigator.pushNamed(context, '/monarch-import'),
+          ),
+          _settingsTile(
             icon: Icons.delete_outline,
             title: 'Clear Cache',
             subtitle: 'Remove offline data',
