@@ -107,10 +107,14 @@ class _AssetsScreenState extends State<AssetsScreen> {
     }
   }
 
+  static const _retirementTypes = ['401k', 'roth_ira', 'ira', 'hsa', '403b', 'pension', '529'];
+
   void _showAddAssetDialog() {
     final theme = Theme.of(context);
     final nameController = TextEditingController();
     final valueController = TextEditingController();
+    final penaltyController = TextEditingController();
+    final taxController = TextEditingController();
     String selectedType = 'cash';
 
     final types = {
@@ -244,6 +248,40 @@ class _AssetsScreenState extends State<AssetsScreen> {
                   fillColor: theme.colorScheme.surfaceContainerLowest,
                 ),
               ),
+              // Penalty/Tax rate fields for retirement types
+              if (_retirementTypes.contains(selectedType)) ...[
+                const SizedBox(height: 16),
+                TextField(
+                  controller: penaltyController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: selectedType == 'ira' ? 'Early Withdrawal Penalty (%)' : 'Penalty Rate (%)',
+                    hintText: selectedType == 'ira' ? '0' : '10',
+                    prefixIcon: const Icon(Icons.percent),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    filled: true, fillColor: theme.colorScheme.surfaceContainerLowest,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                TextField(
+                  controller: taxController,
+                  keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                  decoration: InputDecoration(
+                    labelText: selectedType == 'ira' ? 'State Tax Rate (%)' : 'Tax Rate (%)',
+                    hintText: selectedType == 'ira' ? '0' : '25',
+                    prefixIcon: const Icon(Icons.account_balance),
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    filled: true, fillColor: theme.colorScheme.surfaceContainerLowest,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  selectedType == 'ira'
+                      ? 'IRAs are tax-exempt by default. Add your state tax rate if applicable. States like TX, FL, NV, WA have no state income tax.'
+                      : 'Defaults: 10% penalty, 22% federal + state tax. Adjust for your situation.',
+                  style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                ),
+              ],
               const SizedBox(height: 24),
               SizedBox(
                 width: double.infinity,
@@ -265,10 +303,14 @@ class _AssetsScreenState extends State<AssetsScreen> {
                     try {
                       final authService = context.read<AuthService>();
                       final apiService = ApiService(authService);
+                      final penaltyVal = double.tryParse(penaltyController.text.trim());
+                      final taxVal = double.tryParse(taxController.text.trim());
                       await apiService.addAsset(Asset(
                         name: name,
                         type: selectedType,
                         value: value,
+                        penaltyRate: (_retirementTypes.contains(selectedType) && penaltyVal != null) ? penaltyVal / 100 : null,
+                        taxRate: (_retirementTypes.contains(selectedType) && taxVal != null) ? taxVal / 100 : null,
                       ));
                       _loadAssets();
                       if (mounted) {
