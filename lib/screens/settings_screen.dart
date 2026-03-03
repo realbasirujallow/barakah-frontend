@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:dio/dio.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/currency_service.dart';
 import 'package:barakah_app/services/biometric_service.dart';
 import 'package:barakah_app/services/notification_service.dart';
 import 'package:barakah_app/services/cache_service.dart';
+import 'package:barakah_app/services/api_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsScreen extends StatefulWidget {
@@ -330,6 +332,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
               }
             },
           ),
+          const SizedBox(height: 16),
+
+          // Danger Zone
+          _sectionHeader('Danger Zone'),
+          _settingsTile(
+            icon: Icons.delete_forever,
+            title: 'Delete Account',
+            subtitle: 'Permanently delete your account',
+            onTap: () => _showDeleteAccountDialog(authService),
+          ),
           const SizedBox(height: 24),
 
           // Logout
@@ -501,6 +513,92 @@ class _SettingsScreenState extends State<SettingsScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showDeleteAccountDialog(AuthService authService) {
+    final passwordController = TextEditingController();
+    String? errorMsg;
+
+    showDialog(
+      context: context,
+      builder: (ctx) => StatefulBuilder(
+        builder: (ctx, setDialogState) => AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Row(
+            children: [
+              Icon(Icons.warning_amber_rounded, color: Colors.red, size: 28),
+              SizedBox(width: 8),
+              Text('Delete Account', style: TextStyle(color: Colors.red)),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'This will permanently delete your account and all data. This cannot be undone.',
+                style: TextStyle(fontSize: 14, color: Colors.grey),
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: passwordController,
+                obscureText: true,
+                decoration: InputDecoration(
+                  labelText: 'Enter your password',
+                  border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                  prefixIcon: const Icon(Icons.lock_outline),
+                ),
+              ),
+              if (errorMsg != null) ...[
+                const SizedBox(height: 8),
+                Text(errorMsg!, style: const TextStyle(color: Colors.red, fontSize: 13)),
+              ],
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              onPressed: () async {
+                final password = passwordController.text.trim();
+                if (password.isEmpty) {
+                  setDialogState(() => errorMsg = 'Please enter your password');
+                  return;
+                }
+                try {
+                  final api = ApiService(authService);
+                  await api.deleteAccount(password);
+                  if (ctx.mounted) Navigator.pop(ctx);
+                  await authService.logout();
+                  if (mounted) {
+                    Navigator.pushReplacementNamed(context, '/login');
+                  }
+                } catch (e) {
+                  String msg = 'Failed to delete account';
+                  if (e is DioException && e.response?.data != null) {
+                    final data = e.response!.data;
+                    if (data is Map && data['error'] != null) {
+                      msg = data['error'];
+                    }
+                  } else if (e is Exception) {
+                    msg = e.toString().replaceFirst('Exception: ', '');
+                  }
+                  setDialogState(() => errorMsg = msg);
+                }
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        ),
       ),
     );
   }
