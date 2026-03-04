@@ -50,6 +50,7 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
   List<_ExistingAccount> _existingDebts = [];
   int _totalRecords = 0;
   Map<String, dynamic>? _result;
+  int _duplicateCount = 0;  // how many rows were already in Barakah
 
   late final ApiService _api;
 
@@ -118,7 +119,8 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
         _accounts = accounts;
         _existingAssets = existingAssets;
         _existingDebts = existingDebts;
-        _totalRecords = (data['totalRecords'] as num).toInt();
+        _totalRecords = (data['totalRecords'] as num? ?? data['totalTransactions'] as num? ?? 0).toInt();
+        _duplicateCount = (data['duplicateCount'] as num?)?.toInt() ?? 0;
         _step = _Step.preview;
         _uploading = false;
       });
@@ -249,8 +251,33 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
             _statChip('Debts', '$_debtCount', Colors.red),
             if (_updateCount > 0)
               _statChip('Updates', '$_updateCount', Colors.blue),
+            if (_duplicateCount > 0)
+              _statChip('Dupes', '$_duplicateCount', Colors.orange),
           ],
         ),
+        if (_duplicateCount > 0)
+          Container(
+            width: double.infinity,
+            margin: const EdgeInsets.only(top: 6, bottom: 2),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: Colors.orange.shade50,
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: Colors.orange.shade200),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.info_outline, color: Colors.orange, size: 16),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    '$_duplicateCount transaction${_duplicateCount == 1 ? '' : 's'} already imported — pre-skipped to prevent duplicates.',
+                    style: const TextStyle(fontSize: 12, color: Colors.orange),
+                  ),
+                ),
+              ],
+            ),
+          ),
         const SizedBox(height: 8),
         Row(
           children: [
