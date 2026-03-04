@@ -1,11 +1,16 @@
 'use client';
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 const API_URL = 'https://api.trybarakah.com';
-const USER_ID = 'demo-user';
+
+// Sends the httpOnly auth_token cookie automatically — no user ID in headers.
+const apiFetch = (path, opts = {}) =>
+  fetch(`${API_URL}${path}`, { credentials: 'include', ...opts });
 
 export default function Dashboard() {
+  const router = useRouter();
   const [stats, setStats] = useState(null);
   const [assets, setAssets] = useState([]);
   const [transactions, setTransactions] = useState([]);
@@ -19,16 +24,16 @@ export default function Dashboard() {
   const loadData = async () => {
     try {
       const [statsRes, assetsRes, transactionsRes] = await Promise.all([
-        fetch(`${API_URL}/api/mobile/quick-stats`, {
-          headers: { 'X-User-Id': USER_ID }
-        }),
-        fetch(`${API_URL}/api/assets/list`, {
-          headers: { 'X-User-Id': USER_ID }
-        }),
-        fetch(`${API_URL}/api/transactions/list?limit=5`, {
-          headers: { 'X-User-Id': USER_ID }
-        })
+        apiFetch('/api/mobile/quick-stats'),
+        apiFetch('/api/assets/list'),
+        apiFetch('/api/transactions/list?limit=5'),
       ]);
+
+      // Any 401 means the session cookie is missing or expired — send to login
+      if (statsRes.status === 401 || assetsRes.status === 401 || transactionsRes.status === 401) {
+        router.replace('/login');
+        return;
+      }
 
       const statsData = await statsRes.json();
       const assetsData = await assetsRes.json();
@@ -39,7 +44,7 @@ export default function Dashboard() {
       setTransactions(transactionsData.transactions || []);
       setLoading(false);
     } catch (error) {
-      console.error('Error loading data:', error);
+      console.error('Error loading dashboard:', error);
       setLoading(false);
     }
   };
@@ -209,16 +214,10 @@ function AssetsTab({ assets, onRefresh }) {
   const addAsset = async (e) => {
     e.preventDefault();
     try {
-      await fetch(`${API_URL}/api/assets/add`, {
+      await apiFetch('/api/assets/add', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-User-Id': USER_ID
-        },
-        body: JSON.stringify({
-          ...formData,
-          value: parseFloat(formData.value)
-        })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...formData, value: parseFloat(formData.value) }),
       });
       setFormData({ name: '', type: 'cash', value: '' });
       setShowForm(false);
@@ -336,9 +335,19 @@ function TransactionsTab({ transactions, onRefresh }) {
 
 function ZakatTab({ assets }) {
   const [zakatInfo, setZakatInfo] = useState(null);
+  const [nisab, setNisab] = useState(5686.2); // cached fallback until API responds
   const totalWealth = assets.reduce((sum, asset) => sum + asset.value, 0);
-  const nisab = 5686.2;
   const zakatDue = totalWealth >= nisab ? totalWealth * 0.025 : 0;
+
+  useEffect(() => {
+    apiFetch('/api/zakat/nisab')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => {
+        const liveNisab = data?.nisabGoldUSD ?? data?.nisabUSD;
+        if (liveNisab) setNisab(liveNisab);
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <div>
