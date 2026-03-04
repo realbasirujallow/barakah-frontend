@@ -1,0 +1,10 @@
+# Release signing config — copy this file to key.properties and fill in values.
+# key.properties is gitignored and must NEVER be committed.
+#
+# Generate a keystore:
+#   keytool -genkey -v -keystore ~/barakah-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias barakah
+#
+storePassword=YOUR_STORE_PASSWORD
+keyPassword=YOUR_KEY_PASSWORD
+keyAlias=barakah
+storeFile=/path/to/barakah-release.jks
