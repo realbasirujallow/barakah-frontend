@@ -24,3 +24,18 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Legal pages — prose list styles */
+.prose-legal ul,
+.prose-legal ol {
+  margin: 0.5rem 0 0.5rem 1.5rem;
+}
+.prose-legal ul {
+  list-style-type: disc;
+}
+.prose-legal ol {
+  list-style-type: decimal;
+}
+.prose-legal li {
+  margin-bottom: 0.35rem;
+}
