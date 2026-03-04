@@ -223,6 +223,18 @@ class ApiService {
     await _dio.delete('/api/transactions/$id');
   }
 
+  /// Bulk-delete multiple transactions in a single request.
+  /// Returns the number of rows deleted.
+  Future<int> deleteTransactions(List<int> ids) async {
+    if (ids.isEmpty) return 0;
+    final response = await _dio.delete(
+      '/api/transactions/bulk',
+      data: {'ids': ids},
+    );
+    final data = response.data as Map<String, dynamic>;
+    return (data['deleted'] as num?)?.toInt() ?? 0;
+  }
+
   Future<Map<String, dynamic>> getTransactionSummary({String period = 'month'}) async {
     final response = await _dio.get('/api/transactions/summary', queryParameters: {'period': period});
     return response.data as Map<String, dynamic>;
