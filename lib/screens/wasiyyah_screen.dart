@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 
@@ -43,7 +43,7 @@ class _WasiyyahScreenState extends State<WasiyyahScreen> {
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
-      final api = ApiService(context.read<AuthService>());
+      final api = context.read<ApiService>();
       final results = await Future.wait([api.getWasiyyahList(), api.getIslamicShares()]);
       final data = results[0];
       setState(() {
@@ -56,6 +56,7 @@ class _WasiyyahScreenState extends State<WasiyyahScreen> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load wasiyyah: ${ApiService.errorMessage(e)}'), backgroundColor: Colors.red));
     }
   }
 
@@ -187,7 +188,7 @@ class _WasiyyahScreenState extends State<WasiyyahScreen> {
                         return;
                       }
                       try {
-                        final api = ApiService(context.read<AuthService>());
+                        final api = context.read<ApiService>();
                         await api.addWasiyyahBeneficiary(
                           beneficiaryName: nameCtrl.text,
                           relationship: selectedRelationship,
@@ -235,7 +236,7 @@ class _WasiyyahScreenState extends State<WasiyyahScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
+          ? ShimmerLoading()
           : RefreshIndicator(
               onRefresh: _loadData,
               child: ListView(
@@ -370,7 +371,7 @@ class _WasiyyahScreenState extends State<WasiyyahScreen> {
                             PopupMenuButton<String>(
                               onSelected: (v) async {
                                 if (v == 'delete') {
-                                  final api = ApiService(context.read<AuthService>());
+                                  final api = context.read<ApiService>();
                                   await api.deleteWasiyyahBeneficiary(ben['id'] as int);
                                   _loadData();
                                 }

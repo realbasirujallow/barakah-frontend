@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:barakah_app/services/auth_service.dart';
+import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 import 'package:barakah_app/screens/login_screen.dart';
 import 'package:barakah_app/screens/signup_screen.dart';
@@ -71,6 +72,9 @@ class BarakahApp extends StatelessWidget {
       providers: [
         ChangeNotifierProvider.value(value: authService),
         ChangeNotifierProvider(create: (_) => ThemeProvider()),
+        ProxyProvider<AuthService, ApiService>(
+          update: (_, auth, __) => ApiService(auth),
+        ),
       ],
       child: Consumer2<AuthService, ThemeProvider>(
         builder: (context, auth, themeProvider, _) {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:barakah_app/services/auth_service.dart';
@@ -129,8 +130,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     });
 
     try {
-      final authService = context.read<AuthService>();
-      final apiService = ApiService(authService);
+      final apiService = context.read<ApiService>();
 
       final results = await Future.wait([
         apiService.getAssets(),
@@ -184,8 +184,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final authService = context.watch<AuthService>();
     final currencyFormat = NumberFormat.currency(symbol: '\$', decimalDigits: 2);
+
+    final authService = context.read<AuthService>();
 
     return Scaffold(
       backgroundColor: AppTheme.cream,
@@ -222,7 +223,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
+          ? ShimmerLoading()
           : _error != null
               ? Center(
                   child: Column(

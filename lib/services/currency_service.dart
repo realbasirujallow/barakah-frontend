@@ -53,10 +53,9 @@ class CurrencyService {
     }
 
     try {
-      // Using free exchangerate.host API
+      // Using free Open Exchange Rates API (no key required)
       final response = await _dio.get(
-        'https://api.exchangerate.host/latest',
-        queryParameters: {'base': base},
+        'https://open.er-api.com/v6/latest/$base',
       );
 
       if (response.data != null && response.data['rates'] != null) {

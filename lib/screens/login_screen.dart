@@ -98,7 +98,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
     try {
       final authService = context.read<AuthService>();
-      final apiService = ApiService(authService);
+      final apiService = context.read<ApiService>();
 
       final response = await apiService.login(
         _emailController.text.trim(),

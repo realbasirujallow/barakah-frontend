@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/services/notification_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
@@ -20,6 +20,7 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
   int _overdueCount = 0;
   bool _isLoading = true;
   late TabController _tabController;
+  String _searchQuery = '';
 
   final _categories = ['utilities', 'rent', 'insurance', 'subscription', 'phone', 'internet', 'other'];
 
@@ -49,7 +50,7 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
   Future<void> _loadBills() async {
     setState(() => _isLoading = true);
     try {
-      final api = ApiService(context.read<AuthService>());
+      final api = context.read<ApiService>();
       final data = await api.getBills();
       setState(() {
         _bills = data['bills'] as List<dynamic>? ?? [];
@@ -62,6 +63,7 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
       NotificationService().scheduleAllBillReminders(_bills);
     } catch (e) {
       setState(() => _isLoading = false);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load bills: ${ApiService.errorMessage(e)}'), backgroundColor: Colors.red));
     }
   }
 
@@ -135,7 +137,7 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
                         return;
                       }
                       try {
-                        final api = ApiService(context.read<AuthService>());
+                        final api = context.read<ApiService>();
                         await api.addBill(
                           name: nameCtrl.text,
                           amount: amount,
@@ -170,15 +172,19 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
   }
 
   List<dynamic> _filterBills(String tab) {
+    final q = _searchQuery.toLowerCase();
+    bool matchesSearch(dynamic b) => q.isEmpty ||
+        (b['name'] as String? ?? '').toLowerCase().contains(q) ||
+        (b['category'] as String? ?? '').toLowerCase().contains(q);
     switch (tab) {
       case 'upcoming':
-        return _bills.where((b) => !(b['paid'] as bool? ?? false)).toList();
+        return _bills.where((b) => !(b['paid'] as bool? ?? false)).where(matchesSearch).toList();
       case 'overdue':
-        return _bills.where((b) => (b['overdue'] as bool? ?? false)).toList();
+        return _bills.where((b) => (b['overdue'] as bool? ?? false)).where(matchesSearch).toList();
       case 'paid':
-        return _bills.where((b) => (b['paid'] as bool? ?? false)).toList();
+        return _bills.where((b) => (b['paid'] as bool? ?? false)).where(matchesSearch).toList();
       default:
-        return _bills;
+        return _bills.where(matchesSearch).toList();
     }
   }
 
@@ -206,7 +212,7 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
+          ? ShimmerLoading()
           : Column(
               children: [
                 // Summary
@@ -232,6 +238,21 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
                         Text('$_overdueCount', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18, color: _overdueCount > 0 ? Colors.red : Colors.green)),
                       ]),
                     ],
+                  ),
+                ),
+                // Search bar
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  child: TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search bills...',
+                      prefixIcon: const Icon(Icons.search, color: AppTheme.deepGreen),
+                      filled: true,
+                      fillColor: theme.cardColor,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                    ),
+                    onChanged: (v) => setState(() => _searchQuery = v),
                   ),
                 ),
                 Expanded(
@@ -323,7 +344,7 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
                 if (!paid)
                   IconButton(
                     onPressed: () async {
-                      final api = ApiService(context.read<AuthService>());
+                      final api = context.read<ApiService>();
                       await api.markBillPaid(bill['id'] as int);
                       _loadBills();
                     },
@@ -333,7 +354,7 @@ class _BillsScreenState extends State<BillsScreen> with SingleTickerProviderStat
                 PopupMenuButton<String>(
                   onSelected: (v) async {
                     if (v == 'delete') {
-                      final api = ApiService(context.read<AuthService>());
+                      final api = context.read<ApiService>();
                       await api.deleteBill(bill['id'] as int);
                       _loadBills();
                     }

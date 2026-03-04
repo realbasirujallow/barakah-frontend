@@ -583,7 +583,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   return;
                 }
                 try {
-                  final api = ApiService(authService);
+                  final api = context.read<ApiService>();
                   await api.deleteAccount(password);
                   if (ctx.mounted) Navigator.pop(ctx);
                   await authService.logout();

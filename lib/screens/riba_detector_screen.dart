@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:intl/intl.dart';
 
 class RibaDetectorScreen extends StatefulWidget {
@@ -26,7 +26,7 @@ class _RibaDetectorScreenState extends State<RibaDetectorScreen> {
   Future<void> _scanTransactions() async {
     setState(() => _isLoading = true);
     try {
-      final api = ApiService(context.read<AuthService>());
+      final api = context.read<ApiService>();
       final data = await api.scanForRiba();
       setState(() {
         _report = data;
@@ -34,6 +34,7 @@ class _RibaDetectorScreenState extends State<RibaDetectorScreen> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load riba scan: ${ApiService.errorMessage(e)}'), backgroundColor: Colors.red));
     }
   }
 
@@ -73,14 +74,7 @@ class _RibaDetectorScreenState extends State<RibaDetectorScreen> {
         ],
       ),
       body: _isLoading
-          ? Center(child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                const CircularProgressIndicator(color: AppTheme.deepGreen),
-                const SizedBox(height: 16),
-                Text('Scanning transactions for riba...', style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
-              ],
-            ))
+          ? const ShimmerLoading(type: ShimmerType.card)
           : _report == null
               ? Center(child: Text('Failed to scan', style: TextStyle(color: theme.colorScheme.onSurfaceVariant)))
               : RefreshIndicator(

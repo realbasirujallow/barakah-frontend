@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 import 'package:intl/intl.dart';
@@ -43,7 +43,7 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
   Future<void> _loadDebts() async {
     setState(() => _isLoading = true);
     try {
-      final api = ApiService(context.read<AuthService>());
+      final api = context.read<ApiService>();
       final data = await api.getDebts();
       setState(() {
         _debts = data['debts'] as List<dynamic>? ?? [];
@@ -195,7 +195,7 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
                         return;
                       }
                       try {
-                        final api = ApiService(context.read<AuthService>());
+                        final api = context.read<ApiService>();
                         await api.addDebt(
                           name: nameCtrl.text,
                           type: selectedType,
@@ -256,7 +256,7 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
                 return;
               }
               try {
-                final api = ApiService(context.read<AuthService>());
+                final api = context.read<ApiService>();
                 await api.makeDebtPayment(debt['id'] as int, payAmt);
                 if (ctx.mounted) Navigator.pop(ctx);
                 _loadDebts();
@@ -287,7 +287,7 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
         foregroundColor: Colors.white,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
+          ? ShimmerLoading()
           : RefreshIndicator(
               onRefresh: _loadDebts,
               child: ListView(
@@ -400,7 +400,7 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
                                     if (v == 'pay') {
                                       _showPaymentDialog(debt);
                                     } else if (v == 'delete') {
-                                      final api = ApiService(context.read<AuthService>());
+                                      final api = context.read<ApiService>();
                                       await api.deleteDebt(debt['id'] as int);
                                       _loadDebts();
                                     }

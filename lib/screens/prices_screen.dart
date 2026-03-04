@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/models/price.dart';
 import 'package:barakah_app/theme/app_theme.dart';
@@ -45,8 +45,7 @@ class _PricesScreenState extends State<PricesScreen> with SingleTickerProviderSt
 
   Future<void> _loadCryptoPrices() async {
     setState(() => _isLoadingCrypto = true);
-    final authService = context.read<AuthService>();
-    final apiService = ApiService(authService);
+    final apiService = context.read<ApiService>();
 
     for (final symbol in _popularCryptos) {
       try {
@@ -62,8 +61,7 @@ class _PricesScreenState extends State<PricesScreen> with SingleTickerProviderSt
 
   Future<void> _loadStockPrices() async {
     setState(() => _isLoadingStocks = true);
-    final authService = context.read<AuthService>();
-    final apiService = ApiService(authService);
+    final apiService = context.read<ApiService>();
 
     for (final symbol in _popularStocks) {
       try {
@@ -85,8 +83,7 @@ class _PricesScreenState extends State<PricesScreen> with SingleTickerProviderSt
       _searchError = null;
     });
 
-    final authService = context.read<AuthService>();
-    final apiService = ApiService(authService);
+    final apiService = context.read<ApiService>();
     final symbol = query.trim().toUpperCase();
 
     try {
@@ -180,7 +177,7 @@ class _PricesScreenState extends State<PricesScreen> with SingleTickerProviderSt
               children: [
                 // Crypto tab
                 _isLoadingCrypto && _cryptoPrices.isEmpty
-                    ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
+                    ? ShimmerLoading()
                     : RefreshIndicator(
                         onRefresh: _loadCryptoPrices,
                         child: ListView.builder(
@@ -281,7 +278,7 @@ class _PricesScreenState extends State<PricesScreen> with SingleTickerProviderSt
 
                 // Stocks tab
                 _isLoadingStocks && _stockPrices.isEmpty
-                    ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
+                    ? ShimmerLoading()
                     : RefreshIndicator(
                         onRefresh: _loadStockPrices,
                         child: ListView.builder(

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'dart:math' as math;
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:barakah_app/services/api_service.dart';
 
 class CreditScoreScreen extends StatefulWidget {
@@ -26,7 +26,7 @@ class _CreditScoreScreenState extends State<CreditScoreScreen>
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _apiService = ApiService(Provider.of<AuthService>(context, listen: false));
+    _apiService = context.read<ApiService>();
     _loadData();
   }
 
@@ -87,7 +87,7 @@ class _CreditScoreScreenState extends State<CreditScoreScreen>
         ],
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? ShimmerLoading()
           : TabBarView(
               controller: _tabController,
               children: [

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 
@@ -45,8 +45,7 @@ class _HalalScreenerScreenState extends State<HalalScreenerScreen>
   }
 
   ApiService get _api {
-    final auth = context.read<AuthService>();
-    return ApiService(auth);
+    return context.read<ApiService>();
   }
 
   Future<void> _loadHalalList() async {
@@ -352,7 +351,7 @@ class _HalalScreenerScreenState extends State<HalalScreenerScreen>
   Widget _buildListTab() {
     final theme = Theme.of(context);
     if (_isLoadingList) {
-      return const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen));
+      return ShimmerLoading();
     }
 
     // Group filtered stocks by sector

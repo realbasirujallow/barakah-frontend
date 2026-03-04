@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/models/asset.dart';
 import 'package:barakah_app/theme/app_theme.dart';
@@ -18,6 +18,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
   List<Asset> _assets = [];
   bool _isLoading = true;
   String? _error;
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -32,8 +33,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
     });
 
     try {
-      final authService = context.read<AuthService>();
-      final apiService = ApiService(authService);
+      final apiService = context.read<ApiService>();
       final assets = await apiService.getAssets();
       setState(() {
         _assets = assets;
@@ -48,8 +48,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
   }
 
   Future<void> _deleteAsset(Asset asset) async {
-    final authService = context.read<AuthService>();
-    final apiService = ApiService(authService);
+    final apiService = context.read<ApiService>();
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     final confirmed = await showDialog<bool>(
@@ -85,8 +84,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
 
   Future<void> _updatePrice(Asset asset) async {
     try {
-      final authService = context.read<AuthService>();
-      final apiService = ApiService(authService);
+      final apiService = context.read<ApiService>();
       final source = asset.type.toLowerCase() == 'stock' ? 'stock' : 'crypto';
       await apiService.updateAssetPrice(asset.id!, symbol: asset.name.toUpperCase(), source: source);
       _loadAssets();
@@ -307,8 +305,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
                     Navigator.pop(ctx);
 
                     try {
-                      final authService = context.read<AuthService>();
-                      final apiService = ApiService(authService);
+                      final apiService = context.read<ApiService>();
                       final penaltyVal = double.tryParse(penaltyController.text.trim());
                       final taxVal = double.tryParse(taxController.text.trim());
                       await apiService.addAsset(Asset(
@@ -372,7 +369,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
+          ? ShimmerLoading()
           : _error != null
               ? Center(
                   child: Column(
@@ -452,8 +449,27 @@ class _AssetsScreenState extends State<AssetsScreen> {
                             ),
                             const SizedBox(height: 16),
 
+                            // Search bar
+                            TextField(
+                              decoration: InputDecoration(
+                                hintText: 'Search assets...',
+                                prefixIcon: const Icon(Icons.search, color: AppTheme.deepGreen),
+                                filled: true,
+                                fillColor: theme.cardColor,
+                                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                              ),
+                              onChanged: (v) => setState(() => _searchQuery = v),
+                            ),
+                            const SizedBox(height: 12),
+
                             // Asset list
-                            ..._assets.map((asset) => Padding(
+                            ...(() {
+                              final filtered = _assets.where((a) =>
+                                a.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                                a.type.toLowerCase().contains(_searchQuery.toLowerCase())
+                              ).toList();
+                              return filtered.map((asset) => Padding(
                                   padding: const EdgeInsets.only(bottom: 8),
                                   child: AssetCard(
                                     asset: asset,
@@ -463,7 +479,8 @@ class _AssetsScreenState extends State<AssetsScreen> {
                                         ? () => _updatePrice(asset)
                                         : null,
                                   ),
-                                )),
+                                ));
+                            })(),
                           ],
                         ),
                 ),

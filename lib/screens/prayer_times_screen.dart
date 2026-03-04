@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:barakah_app/services/prayer_times_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 import 'package:geolocator/geolocator.dart';
@@ -278,7 +279,7 @@ class _PrayerTimesScreenState extends State<PrayerTimesScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
+          ? ShimmerLoading()
           : RefreshIndicator(
               onRefresh: _loadPrayerTimes,
               child: ListView(
