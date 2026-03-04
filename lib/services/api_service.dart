@@ -1,20 +1,8 @@
 import 'package:dio/dio.dart';
-import 'dart:convert';
 import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/models/asset.dart';
 import 'package:barakah_app/models/price.dart';
 import 'package:barakah_app/models/transaction.dart';
-
-/// User-friendly exception thrown by [ApiService].
-/// Screens can catch this and display [message] directly in a SnackBar.
-class AppException implements Exception {
-  final String message;
-  final int? statusCode;
-  AppException(this.message, {this.statusCode});
-
-  @override
-  String toString() => message;
-}
 
 class ApiService {
   // Override at build time:  flutter build apk --dart-define=API_URL=http://192.168.1.x:8080
@@ -24,20 +12,28 @@ class ApiService {
   );
 
   late final Dio _dio;
+  // Separate Dio instance for the refresh call — avoids infinite interceptor loops.
+  late final Dio _refreshDio;
   final AuthService _authService;
+
+  // Prevents multiple concurrent 401s from each triggering their own refresh.
+  bool _isRefreshing = false;
+  final List<void Function(String? newToken)> _refreshQueue = [];
 
   ApiService(this._authService) {
     _dio = Dio(BaseOptions(
       baseUrl: baseUrl,
+      connectTimeout: const Duration(seconds: 15),
+      receiveTimeout: const Duration(seconds: 15),
+      headers: {'Content-Type': 'application/json'},
+    ));
+
+    // Separate client used only for the refresh request (no auth interceptor)
+    _refreshDio = Dio(BaseOptions(
+      baseUrl: baseUrl,
       connectTimeout: const Duration(seconds: 10),
       receiveTimeout: const Duration(seconds: 10),
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json; charset=utf-8',
-      },
-      responseDecoder: (responseBytes, options, responseBody) {
-        return utf8.decode(responseBytes);
-      },
+      headers: {'Content-Type': 'application/json'},
     ));
 
     _dio.interceptors.add(InterceptorsWrapper(
@@ -48,66 +44,78 @@ class ApiService {
         }
         return handler.next(options);
       },
-      onError: (DioException e, handler) {
-        // Convert DioException to user-friendly AppException
-        final response = e.response;
-
-        // Handle 401 — token expired / invalid
-        if (response?.statusCode == 401) {
-          _authService.logout();
-          return handler.reject(DioException(
-            requestOptions: e.requestOptions,
-            error: AppException('Session expired. Please log in again.', statusCode: 401),
-          ));
+      onError: (error, handler) async {
+        if (error.response?.statusCode != 401) {
+          return handler.next(error);
         }
 
-        // Extract server error message if available
-        if (response?.data is Map) {
-          final data = response!.data as Map;
-          final serverMsg = data['error'] ?? data['message'];
-          if (serverMsg != null && serverMsg.toString().isNotEmpty) {
-            return handler.reject(DioException(
-              requestOptions: e.requestOptions,
-              error: AppException(serverMsg.toString(), statusCode: response.statusCode),
-            ));
+        // 401 received — attempt silent token refresh before giving up.
+        if (_isRefreshing) {
+          // Another refresh is already in flight; queue this request to retry
+          // once the refresh completes.
+          _refreshQueue.add((newToken) async {
+            if (newToken != null) {
+              error.requestOptions.headers['Authorization'] = 'Bearer $newToken';
+              try {
+                final retried = await _dio.fetch(error.requestOptions);
+                handler.resolve(retried);
+              } catch (e) {
+                handler.next(error);
+              }
+            } else {
+              handler.next(error);
+            }
+          });
+          return;
+        }
+
+        _isRefreshing = true;
+        try {
+          final refreshResp = await _refreshDio.post('/auth/refresh');
+          final newToken = (refreshResp.data as Map<String, dynamic>)['token'] as String?;
+
+          if (newToken != null) {
+            // Persist the new token and update the service state
+            await _authService.saveSession(
+              token: newToken,
+              userId: _authService.userId ?? '',
+              userName: _authService.userName ?? '',
+              userEmail: _authService.userEmail ?? '',
+            );
+
+            // Drain queued requests with the new token
+            for (final cb in _refreshQueue) {
+              cb(newToken);
+            }
+            _refreshQueue.clear();
+
+            // Retry the original failed request
+            error.requestOptions.headers['Authorization'] = 'Bearer $newToken';
+            final retried = await _dio.fetch(error.requestOptions);
+            return handler.resolve(retried);
+          } else {
+            // Refresh returned 200 but no token — treat as expired
+            _drainQueueWithNull();
+            await _authService.logout();
+            return handler.next(error);
           }
+        } catch (_) {
+          // Refresh itself failed (e.g. refresh token expired) — log out
+          _drainQueueWithNull();
+          await _authService.logout();
+          return handler.next(error);
+        } finally {
+          _isRefreshing = false;
         }
-
-        // Map common network errors
-        String message;
-        switch (e.type) {
-          case DioExceptionType.connectionTimeout:
-          case DioExceptionType.receiveTimeout:
-          case DioExceptionType.sendTimeout:
-            message = 'Server is taking too long. Please try again.';
-            break;
-          case DioExceptionType.connectionError:
-          case DioExceptionType.unknown:
-            message = 'No connection to server. Check your internet.';
-            break;
-          default:
-            message = 'Something went wrong. Please try again.';
-        }
-
-        return handler.reject(DioException(
-          requestOptions: e.requestOptions,
-          error: AppException(message, statusCode: response?.statusCode),
-        ));
       },
     ));
   }
 
-  /// Extract user-friendly error message from any exception.
-  /// Use in catch blocks: `catch (e) { showSnackBar(ApiService.errorMessage(e)); }`
-  static String errorMessage(Object error) {
-    if (error is AppException) return error.message;
-    if (error is DioException && error.error is AppException) {
-      return (error.error as AppException).message;
+  void _drainQueueWithNull() {
+    for (final cb in _refreshQueue) {
+      cb(null);
     }
-    if (error is DioException) return 'Something went wrong. Please try again.';
-    final msg = error.toString();
-    if (msg.startsWith('Exception: ')) return msg.substring(11);
-    return msg;
+    _refreshQueue.clear();
   }
 
   // ─── Auth ────────────────────────────────────────────
@@ -126,13 +134,6 @@ class ApiService {
     final response = await _dio.post('/auth/login', data: {
       'email': email,
       'password': password,
-    });
-    return response.data as Map<String, dynamic>;
-  }
-
-  Future<Map<String, dynamic>> resendVerification(String email) async {
-    final response = await _dio.post('/auth/resend-verification', data: {
-      'email': email,
     });
     return response.data as Map<String, dynamic>;
   }
@@ -289,10 +290,6 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
-  Future<void> deleteAccount(String password) async {
-    await _dio.delete('/auth/delete-account', data: {'password': password});
-  }
-
   // ─── Savings Goals ───────────────────────────────────
 
   Future<Map<String, dynamic>> getSavingsGoals() async {
@@ -427,27 +424,6 @@ class ApiService {
 
   Future<void> deleteDebt(int id) async {
     await _dio.delete('/api/debts/$id');
-  }
-
-  Future<Map<String, dynamic>> updateDebt(int id, {
-    required String name,
-    required String type,
-    required double totalAmount,
-    double? monthlyPayment,
-    double? interestRate,
-    bool? ribaFree,
-    String? lender,
-  }) async {
-    final response = await _dio.put('/api/debts/$id', data: {
-      'name': name,
-      'type': type,
-      'totalAmount': totalAmount,
-      'monthlyPayment': ?monthlyPayment,
-      'interestRate': ?interestRate,
-      'ribaFree': ?ribaFree,
-      'lender': ?lender,
-    });
-    return response.data as Map<String, dynamic>;
   }
 
   // ─── Bills ───────────────────────────────────────────
@@ -639,27 +615,6 @@ class ApiService {
     await _dio.delete('/api/waqf/$id');
   }
 
-  Future<Map<String, dynamic>> updateWaqf(int id, {
-    String? organizationName,
-    double? amount,
-    String? type,
-    String? purpose,
-    String? description,
-    bool? recurring,
-    String? frequency,
-  }) async {
-    final data = <String, dynamic>{};
-    if (organizationName != null) data['organizationName'] = organizationName;
-    if (amount != null) data['amount'] = amount;
-    if (type != null) data['type'] = type;
-    if (purpose != null) data['purpose'] = purpose;
-    if (description != null) data['description'] = description;
-    if (recurring != null) data['recurring'] = recurring;
-    if (frequency != null) data['frequency'] = frequency;
-    final response = await _dio.put('/api/waqf/$id', data: data);
-    return response.data as Map<String, dynamic>;
-  }
-
   // ─── Riba Detector ──────────────────────────────────
 
   Future<Map<String, dynamic>> scanForRiba() async {
@@ -799,37 +754,6 @@ class ApiService {
     return response.data as Map<String, dynamic>;
   }
 
-  // ─── Zakat Payments ─────────────────────────────────
-
-  Future<Map<String, dynamic>> getZakatPayments({int? lunarYear}) async {
-    final params = <String, dynamic>{};
-    if (lunarYear != null) params['lunarYear'] = lunarYear;
-    final response = await _dio.get('/api/zakat/payments', queryParameters: params);
-    return response.data as Map<String, dynamic>;
-  }
-
-  Future<Map<String, dynamic>> addZakatPayment({
-    required double amount,
-    String? recipient,
-    String? notes,
-    int? lunarYear,
-    int? paidAt,
-  }) async {
-    final data = <String, dynamic>{
-      'amount': amount,
-    };
-    if (recipient != null) data['recipient'] = recipient;
-    if (notes != null) data['notes'] = notes;
-    if (lunarYear != null) data['lunarYear'] = lunarYear;
-    if (paidAt != null) data['paidAt'] = paidAt;
-    final response = await _dio.post('/api/zakat/payments', data: data);
-    return response.data as Map<String, dynamic>;
-  }
-
-  Future<void> deleteZakatPayment(int id) async {
-    await _dio.delete('/api/zakat/payments/$id');
-  }
-
   // ─── Investment Accounts ────────────────────────────
 
   Future<Map<String, dynamic>> addInvestmentAccount(Map<String, dynamic> data) async {
@@ -927,30 +851,6 @@ class ApiService {
     if (payments != null) params['payments'] = payments;
     if (inquiries != null) params['inquiries'] = inquiries;
     final response = await _dio.get('/api/credit-score/simulate', queryParameters: params);
-    return response.data as Map<String, dynamic>;
-  }
-
-  // ─── Import (Monarch Money) ──────────────────────────────────────────────
-
-  /// Upload a Monarch Money Balances CSV for preview.
-  Future<Map<String, dynamic>> monarchPreview(String filePath) async {
-    final formData = FormData.fromMap({
-      'file': await MultipartFile.fromFile(filePath, filename: 'balances.csv'),
-    });
-    final response = await _dio.post(
-      '/api/import/monarch/preview',
-      data: formData,
-      options: Options(contentType: 'multipart/form-data'),
-    );
-    return response.data as Map<String, dynamic>;
-  }
-
-  /// Execute the Monarch import with the user-confirmed account selections.
-  Future<Map<String, dynamic>> monarchExecute(List<Map<String, dynamic>> accounts) async {
-    final response = await _dio.post(
-      '/api/import/monarch/execute',
-      data: {'accounts': accounts},
-    );
     return response.data as Map<String, dynamic>;
   }
 }
