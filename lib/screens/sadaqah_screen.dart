@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 import 'package:intl/intl.dart';
@@ -51,7 +51,7 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
   Future<void> _loadDonations() async {
     setState(() => _isLoading = true);
     try {
-      final api = ApiService(context.read<AuthService>());
+      final api = context.read<ApiService>();
       final data = await api.getSadaqahList();
       setState(() {
         _donations = data['donations'] as List<dynamic>? ?? [];
@@ -61,6 +61,7 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load sadaqah: ${ApiService.errorMessage(e)}'), backgroundColor: Colors.red));
     }
   }
 
@@ -133,7 +134,7 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
                         return;
                       }
                       try {
-                        final api = ApiService(context.read<AuthService>());
+                        final api = context.read<ApiService>();
                         final result = await api.addSadaqah(
                           amount: amount,
                           category: selectedCategory,
@@ -180,7 +181,7 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
         foregroundColor: Colors.white,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
+          ? ShimmerLoading()
           : RefreshIndicator(
               onRefresh: _loadDonations,
               child: ListView(
@@ -291,7 +292,7 @@ class _SadaqahScreenState extends State<SadaqahScreen> {
                             PopupMenuButton<String>(
                               onSelected: (v) async {
                                 if (v == 'delete') {
-                                  final api = ApiService(context.read<AuthService>());
+                                  final api = context.read<ApiService>();
                                   await api.deleteSadaqah(donation['id'] as int);
                                   _loadDonations();
                                 }

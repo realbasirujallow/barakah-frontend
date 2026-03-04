@@ -42,7 +42,7 @@ class _SignupScreenState extends State<SignupScreen> {
 
     try {
       final authService = context.read<AuthService>();
-      final apiService = ApiService(authService);
+      final apiService = context.read<ApiService>();
 
       await apiService.signup(
         _nameController.text.trim(),

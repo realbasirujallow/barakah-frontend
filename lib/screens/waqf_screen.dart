@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 import 'package:intl/intl.dart';
@@ -46,7 +46,7 @@ class _WaqfScreenState extends State<WaqfScreen> {
   Future<void> _loadContributions() async {
     setState(() => _isLoading = true);
     try {
-      final api = ApiService(context.read<AuthService>());
+      final api = context.read<ApiService>();
       final data = await api.getWaqfList();
       setState(() {
         _contributions = data['contributions'] as List<dynamic>? ?? [];
@@ -56,6 +56,7 @@ class _WaqfScreenState extends State<WaqfScreen> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load waqf: ${ApiService.errorMessage(e)}'), backgroundColor: Colors.red));
     }
   }
 
@@ -133,7 +134,7 @@ class _WaqfScreenState extends State<WaqfScreen> {
                         return;
                       }
                       try {
-                        final api = ApiService(context.read<AuthService>());
+                        final api = context.read<ApiService>();
                         final result = await api.addWaqf(
                           organizationName: orgCtrl.text,
                           amount: amount,
@@ -180,7 +181,7 @@ class _WaqfScreenState extends State<WaqfScreen> {
         foregroundColor: Colors.white,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
+          ? ShimmerLoading()
           : RefreshIndicator(
               onRefresh: _loadContributions,
               child: ListView(
@@ -305,7 +306,7 @@ class _WaqfScreenState extends State<WaqfScreen> {
                             PopupMenuButton<String>(
                               onSelected: (v) async {
                                 if (v == 'delete') {
-                                  final api = ApiService(context.read<AuthService>());
+                                  final api = context.read<ApiService>();
                                   await api.deleteWaqf(contrib['id'] as int);
                                   _loadContributions();
                                 }

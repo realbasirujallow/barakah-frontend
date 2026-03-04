@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 import 'package:printing/printing.dart';
@@ -8,7 +9,6 @@ import 'package:provider/provider.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:barakah_app/services/api_service.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 
 class ReportsScreen extends StatefulWidget {
@@ -41,8 +41,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Future<void> _exportCsv() async {
     setState(() => _isLoading = true);
     try {
-      final authService = Provider.of<AuthService>(context, listen: false);
-      final apiService = ApiService(authService);
+      final apiService = context.read<ApiService>();
       final bytes = await apiService.exportTransactionsCsv(period: _selectedPeriod);
 
       final dir = await getTemporaryDirectory();
@@ -67,8 +66,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
   Future<void> _exportServerPdf() async {
     setState(() => _isLoading = true);
     try {
-      final authService = Provider.of<AuthService>(context, listen: false);
-      final apiService = ApiService(authService);
+      final apiService = context.read<ApiService>();
       final bytes = await apiService.exportTransactionsPdf(period: _selectedPeriod);
 
       final dir = await getTemporaryDirectory();
@@ -196,8 +194,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
     setState(() => _isLoading = true);
     try {
       final pdf = pw.Document();
-      final authService = Provider.of<AuthService>(context, listen: false);
-      final apiService = ApiService(authService);
+      final apiService = context.read<ApiService>();
       final now = DateTime.now();
       final dateStr = DateFormat('MMMM d, yyyy').format(now);
 
@@ -568,16 +565,7 @@ class _ReportsScreenState extends State<ReportsScreen> {
         foregroundColor: Colors.white,
       ),
       body: _isLoading
-          ? const Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  CircularProgressIndicator(color: AppTheme.deepGreen),
-                  SizedBox(height: 16),
-                  Text('Generating report...', style: TextStyle(color: AppTheme.deepGreen)),
-                ],
-              ),
-            )
+          ? const ShimmerLoading(type: ShimmerType.card)
           : ListView(
               padding: const EdgeInsets.all(16),
               children: [

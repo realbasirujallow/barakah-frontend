@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 import 'package:intl/intl.dart';
@@ -26,7 +26,7 @@ class _SharedFinancesScreenState extends State<SharedFinancesScreen> {
 
   Future<void> _loadGroups() async {
     try {
-      final api = ApiService(Provider.of<AuthService>(context, listen: false));
+      final api = context.read<ApiService>();
       final data = await api.getSharedGroups();
       setState(() {
         _groups = List<Map<String, dynamic>>.from(data['groups'] ?? []);
@@ -112,7 +112,7 @@ class _SharedFinancesScreenState extends State<SharedFinancesScreen> {
                     if (nameCtrl.text.trim().isEmpty) return;
                     Navigator.pop(ctx);
                     try {
-                      final api = ApiService(Provider.of<AuthService>(context, listen: false));
+                      final api = context.read<ApiService>();
                       final result = await api.createSharedGroup({
                         'name': nameCtrl.text.trim(),
                         'type': selectedType,
@@ -179,7 +179,7 @@ class _SharedFinancesScreenState extends State<SharedFinancesScreen> {
               if (codeCtrl.text.trim().isEmpty) return;
               Navigator.pop(ctx);
               try {
-                final api = ApiService(Provider.of<AuthService>(context, listen: false));
+                final api = context.read<ApiService>();
                 await api.joinSharedGroup(codeCtrl.text.trim());
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -249,7 +249,7 @@ class _SharedFinancesScreenState extends State<SharedFinancesScreen> {
         child: const Icon(Icons.add, color: Colors.white),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? ShimmerLoading()
           : RefreshIndicator(
               onRefresh: _loadGroups,
               child: _groups.isEmpty
@@ -395,7 +395,7 @@ class _GroupDetailScreenState extends State<_GroupDetailScreen> with SingleTicke
     super.dispose();
   }
 
-  ApiService get _api => ApiService(Provider.of<AuthService>(context, listen: false));
+  ApiService get _api => context.read<ApiService>();
 
   Future<void> _loadAll() async {
     try {
@@ -747,7 +747,7 @@ class _GroupDetailScreenState extends State<_GroupDetailScreen> with SingleTicke
         child: const Icon(Icons.add, color: Colors.white),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? ShimmerLoading()
           : TabBarView(
               controller: _tabController,
               children: [

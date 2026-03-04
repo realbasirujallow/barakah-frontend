@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/models/transaction.dart';
 import 'package:barakah_app/theme/app_theme.dart';
@@ -19,6 +19,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   bool _isLoading = true;
   String? _filterType;
   String _period = 'month';
+  String _searchQuery = '';
 
   @override
   void initState() {
@@ -29,8 +30,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
-      final authService = context.read<AuthService>();
-      final apiService = ApiService(authService);
+      final apiService = context.read<ApiService>();
       final results = await Future.wait([
         apiService.getTransactions(type: _filterType),
         apiService.getTransactionSummary(period: _period),
@@ -51,7 +51,6 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
   }
 
   Future<void> _deleteTransaction(Transaction t) async {
-    final authService = context.read<AuthService>();
     final scaffoldMessenger = ScaffoldMessenger.of(context);
 
     final confirmed = await showDialog<bool>(
@@ -71,7 +70,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
     );
     if (confirmed != true) return;
     try {
-      await ApiService(authService).deleteTransaction(t.id!);
+      await context.read<ApiService>().deleteTransaction(t.id!);
       _loadData();
     } catch (e) {
       scaffoldMessenger.showSnackBar(
@@ -259,8 +258,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                       if (amount == null || amount <= 0) return;
                       Navigator.pop(ctx);
                       try {
-                        final authService = context.read<AuthService>();
-                        await ApiService(authService).addTransaction(Transaction(
+                        await context.read<ApiService>().addTransaction(Transaction(
                           type: type,
                           category: category,
                           amount: amount,
@@ -336,7 +334,7 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
+          ? ShimmerLoading()
           : RefreshIndicator(
               onRefresh: _loadData,
               child: ListView(
@@ -368,26 +366,45 @@ class _TransactionsScreenState extends State<TransactionsScreen> {
                       style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.deepGreen)),
                   const SizedBox(height: 12),
 
-                  if (_transactions.isEmpty)
-                    Container(
-                      padding: const EdgeInsets.all(32),
-                      decoration: BoxDecoration(
-                        color: theme.cardColor, borderRadius: BorderRadius.circular(16),
-                      ),
-                      child: Column(
-                        children: [
-                          Icon(Icons.receipt_long_outlined, size: 64, color: theme.dividerColor),
-                          const SizedBox(height: 16),
-                          Text('No transactions yet', style: TextStyle(fontSize: 18, color: theme.colorScheme.onSurfaceVariant)),
-                        ],
-                      ),
-                    )
-                  else
-                    ..._transactions.map((t) => _TransactionTile(
+                  // Search bar
+                  TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search transactions...',
+                      prefixIcon: const Icon(Icons.search, color: AppTheme.deepGreen),
+                      filled: true,
+                      fillColor: theme.cardColor,
+                      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12), borderSide: BorderSide.none),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 16),
+                    ),
+                    onChanged: (v) => setState(() => _searchQuery = v),
+                  ),
+                  const SizedBox(height: 12),
+
+                  ...() {
+                    final filtered = _transactions.where((t) =>
+                      t.description.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+                      t.category.toLowerCase().contains(_searchQuery.toLowerCase())
+                    ).toList();
+                    if (filtered.isEmpty)
+                      return [Container(
+                        padding: const EdgeInsets.all(32),
+                        decoration: BoxDecoration(
+                          color: theme.cardColor, borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Column(
+                          children: [
+                            Icon(Icons.receipt_long_outlined, size: 64, color: theme.dividerColor),
+                            const SizedBox(height: 16),
+                            Text('No transactions yet', style: TextStyle(fontSize: 18, color: theme.colorScheme.onSurfaceVariant)),
+                          ],
+                        ),
+                      )];
+                    return filtered.map((t) => _TransactionTile(
                       transaction: t,
                       currencyFormat: currencyFormat,
                       onDelete: () => _deleteTransaction(t),
-                    )),
+                    )).toList();
+                  }(),
                 ],
               ),
             ),

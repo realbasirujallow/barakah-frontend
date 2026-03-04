@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/models/asset.dart';
 import 'package:barakah_app/models/transaction.dart';
@@ -39,8 +39,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
   }
 
   ApiService get _api {
-    final auth = context.read<AuthService>();
-    return ApiService(auth);
+    return context.read<ApiService>();
   }
 
   Future<void> _loadData() async {
@@ -58,6 +57,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
       });
     } catch (e) {
       setState(() => _isLoading = false);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load analytics: ${ApiService.errorMessage(e)}'), backgroundColor: Colors.red));
     }
   }
 
@@ -81,7 +81,7 @@ class _AnalyticsScreenState extends State<AnalyticsScreen>
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
+          ? ShimmerLoading()
           : TabBarView(
               controller: _tabController,
               children: [

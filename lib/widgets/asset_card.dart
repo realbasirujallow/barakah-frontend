@@ -44,9 +44,10 @@ class AssetCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(12),
             ),
             child: Center(
-              child: Text(
-                asset.typeIcon,
-                style: const TextStyle(fontSize: 24),
+              child: Icon(
+                asset.typeIconData,
+                size: 24,
+                color: AppTheme.deepGreen,
               ),
             ),
           ),

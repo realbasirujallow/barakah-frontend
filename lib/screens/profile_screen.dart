@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
 import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
@@ -38,7 +39,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _loadProfile() async {
     final authService = Provider.of<AuthService>(context, listen: false);
     try {
-      final api = ApiService(authService);
+      final api = context.read<ApiService>();
       final data = await api.getProfile();
       setState(() {
         _nameController.text = data['fullName'] ?? '';
@@ -103,7 +104,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return Scaffold(
       appBar: AppBar(title: const Text('Edit Profile')),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? ShimmerLoading()
           : SingleChildScrollView(
               padding: const EdgeInsets.all(24),
               child: Column(

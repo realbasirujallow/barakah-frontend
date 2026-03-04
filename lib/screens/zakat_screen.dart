@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 import 'package:intl/intl.dart';
@@ -43,8 +43,7 @@ class _ZakatScreenState extends State<ZakatScreen> with SingleTickerProviderStat
   Future<void> _loadData() async {
     setState(() => _isLoading = true);
     try {
-      final authService = context.read<AuthService>();
-      final apiService = ApiService(authService);
+      final apiService = context.read<ApiService>();
       final results = await Future.wait([
         apiService.getAssets(),
         apiService.getAssetTotal(),
@@ -68,6 +67,7 @@ class _ZakatScreenState extends State<ZakatScreen> with SingleTickerProviderStat
       });
     } catch (e) {
       setState(() => _isLoading = false);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load zakat data: ${ApiService.errorMessage(e)}'), backgroundColor: Colors.red));
     }
   }
 
@@ -116,7 +116,7 @@ class _ZakatScreenState extends State<ZakatScreen> with SingleTickerProviderStat
                   final amount = double.tryParse(amountCtrl.text.trim());
                   if (amount == null || amount <= 0) return;
                   try {
-                    final api = ApiService(context.read<AuthService>());
+                    final api = context.read<ApiService>();
                     await api.addZakatPayment(
                       amount: amount,
                       recipient: recipientCtrl.text.trim().isNotEmpty ? recipientCtrl.text.trim() : null,
@@ -208,7 +208,7 @@ class _ZakatScreenState extends State<ZakatScreen> with SingleTickerProviderStat
         ),
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
+          ? ShimmerLoading()
           : TabBarView(
               controller: _tabController,
               children: [
@@ -354,7 +354,7 @@ class _ZakatScreenState extends State<ZakatScreen> with SingleTickerProviderStat
                                   ),
                                   child: Row(
                                     children: [
-                                      Text(_typeIcon(item['type'] ?? ''), style: const TextStyle(fontSize: 24)),
+                                      Icon(_typeIcon(item['type'] ?? ''), size: 24, color: AppTheme.deepGreen),
                                       const SizedBox(width: 10),
                                       Expanded(child: Column(
                                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -518,7 +518,7 @@ class _ZakatScreenState extends State<ZakatScreen> with SingleTickerProviderStat
                                 IconButton(
                                   icon: const Icon(Icons.delete_outline, color: Colors.red, size: 20),
                                   onPressed: () async {
-                                    final api = ApiService(context.read<AuthService>());
+                                    final api = context.read<ApiService>();
                                     await api.deleteZakatPayment(payment['id'] as int);
                                     _loadData();
                                   },
@@ -563,20 +563,20 @@ class _ZakatScreenState extends State<ZakatScreen> with SingleTickerProviderStat
     );
   }
 
-  String _typeIcon(String type) {
+  IconData _typeIcon(String type) {
     switch (type.toLowerCase()) {
-      case 'crypto': return '₿';
-      case 'stock': return '📈';
-      case 'gold': return '🥇';
-      case 'cash': case 'savings_account': case 'checking_account': return '💵';
-      case 'primary_home': case 'real_estate': case 'property': return '🏠';
-      case 'investment_property': case 'investment_property_resale': case 'rental_property': return '🏢';
-      case 'vehicle': case 'car': return '🚗';
-      case '401k': case 'roth_ira': case 'ira': case 'hsa': case '403b': case 'pension': return '🏦';
-      case '529': return '🎓';
-      case 'silver': return '🥈';
-      case 'business': return '🏪';
-      default: return '💰';
+      case 'crypto': return Icons.currency_bitcoin;
+      case 'stock': return Icons.show_chart;
+      case 'gold': return Icons.workspace_premium;
+      case 'cash': case 'savings_account': case 'checking_account': return Icons.account_balance_wallet;
+      case 'primary_home': case 'real_estate': case 'property': return Icons.home;
+      case 'investment_property': case 'investment_property_resale': case 'rental_property': return Icons.business;
+      case 'vehicle': case 'car': return Icons.directions_car;
+      case '401k': case 'roth_ira': case 'ira': case 'hsa': case '403b': case 'pension': return Icons.account_balance;
+      case '529': return Icons.school;
+      case 'silver': return Icons.diamond;
+      case 'business': return Icons.store;
+      default: return Icons.savings;
     }
   }
 }

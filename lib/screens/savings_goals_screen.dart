@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/services/notification_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
@@ -39,7 +39,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
   Future<void> _loadGoals() async {
     setState(() => _loading = true);
     try {
-      final api = ApiService(Provider.of<AuthService>(context, listen: false));
+      final api = context.read<ApiService>();
       final data = await api.getSavingsGoals();
       setState(() {
         _goals = (data['goals'] as List<dynamic>? ?? []).cast<Map<String, dynamic>>();
@@ -145,7 +145,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
                 onPressed: () async {
                   if (nameCtrl.text.isEmpty || targetCtrl.text.isEmpty) return;
                   Navigator.pop(ctx);
-                  final api = ApiService(Provider.of<AuthService>(context, listen: false));
+                  final api = context.read<ApiService>();
                   await api.addSavingsGoal(
                     name: nameCtrl.text.trim(),
                     targetAmount: double.tryParse(targetCtrl.text) ?? 0,
@@ -201,7 +201,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
               final amount = double.tryParse(amountCtrl.text) ?? 0;
               if (amount <= 0) return;
               Navigator.pop(ctx);
-              final api = ApiService(Provider.of<AuthService>(context, listen: false));
+              final api = context.read<ApiService>();
               await api.contributeSavingsGoal(goal['id'] as int, amount);
               // Show savings milestone notification
               final currentAmount = (goal['currentAmount'] as num?)?.toDouble() ?? 0;
@@ -233,7 +233,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
         child: const Icon(Icons.add, color: Colors.white),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? ShimmerLoading()
           : RefreshIndicator(
               onRefresh: _loadGoals,
               child: ListView(
@@ -348,7 +348,7 @@ class _SavingsGoalsScreenState extends State<SavingsGoalsScreen> {
                   PopupMenuButton<String>(
                     onSelected: (action) async {
                       if (action == 'delete') {
-                        final api = ApiService(Provider.of<AuthService>(context, listen: false));
+                        final api = context.read<ApiService>();
                         await api.deleteSavingsGoal(goal['id'] as int);
                         _loadGoals();
                       }

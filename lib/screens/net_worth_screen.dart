@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 import 'package:intl/intl.dart';
@@ -50,8 +50,7 @@ class _NetWorthScreenState extends State<NetWorthScreen> {
     });
 
     try {
-      final authService = context.read<AuthService>();
-      final apiService = ApiService(authService);
+      final apiService = context.read<ApiService>();
 
       // Record a snapshot first (non-blocking), then fetch history
       try { await apiService.recordNetWorthSnapshot(); } catch (_) {}
@@ -105,7 +104,7 @@ class _NetWorthScreenState extends State<NetWorthScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
+          ? ShimmerLoading()
           : _error != null
               ? Center(
                   child: Column(

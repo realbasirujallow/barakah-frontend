@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/services/notification_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
@@ -53,7 +53,7 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
   Future<void> _loadTrackers() async {
     setState(() => _isLoading = true);
     try {
-      final api = ApiService(context.read<AuthService>());
+      final api = context.read<ApiService>();
       final data = await api.getHawlTrackers();
       setState(() {
         _trackers = data['trackers'] as List<dynamic>? ?? [];
@@ -77,6 +77,7 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
       }
     } catch (e) {
       setState(() => _isLoading = false);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load hawl data: ${ApiService.errorMessage(e)}'), backgroundColor: Colors.red));
     }
   }
 
@@ -135,7 +136,7 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
                         return;
                       }
                       try {
-                        final api = ApiService(context.read<AuthService>());
+                        final api = context.read<ApiService>();
                         await api.addHawlTracker(
                           assetName: nameCtrl.text,
                           amount: amount,
@@ -176,7 +177,7 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
         foregroundColor: Colors.white,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
+          ? ShimmerLoading()
           : RefreshIndicator(
               onRefresh: _loadTrackers,
               child: ListView(
@@ -336,7 +337,7 @@ class _HawlTrackerScreenState extends State<HawlTrackerScreen> {
                                   ),
                                 PopupMenuButton<String>(
                                   onSelected: (v) async {
-                                    final api = ApiService(context.read<AuthService>());
+                                    final api = context.read<ApiService>();
                                     if (v == 'paid') {
                                       await api.markHawlZakatPaid(tracker['id'] as int);
                                       _loadTrackers();

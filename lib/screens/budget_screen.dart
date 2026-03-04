@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/services/notification_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
@@ -63,7 +63,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
   Future<void> _loadBudgets() async {
     setState(() => _isLoading = true);
     try {
-      final api = ApiService(context.read<AuthService>());
+      final api = context.read<ApiService>();
       final data = await api.getBudgets(month: _selectedMonth, year: _selectedYear);
       setState(() {
         _budgets = data['budgets'] as List<dynamic>? ?? [];
@@ -151,7 +151,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                       return;
                     }
                     try {
-                      final api = ApiService(context.read<AuthService>());
+                      final api = context.read<ApiService>();
                       await api.addBudget(
                         category: selectedCategory,
                         monthlyLimit: limit,
@@ -197,7 +197,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
         foregroundColor: Colors.white,
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
+          ? ShimmerLoading()
           : RefreshIndicator(
               onRefresh: _loadBudgets,
               child: ListView(
@@ -355,7 +355,7 @@ class _BudgetScreenState extends State<BudgetScreen> {
                                 PopupMenuButton<String>(
                                   onSelected: (v) async {
                                     if (v == 'delete') {
-                                      final api = ApiService(context.read<AuthService>());
+                                      final api = context.read<ApiService>();
                                       await api.deleteBudget(id);
                                       _loadBudgets();
                                     }

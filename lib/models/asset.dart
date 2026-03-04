@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 class Asset {
   final int? id;
   final String name;
@@ -61,22 +63,32 @@ class Asset {
     );
   }
 
-  /// Returns the icon for the asset type
-  String get typeIcon {
+  /// Returns the Material icon for the asset type
+  IconData get typeIconData {
     switch (type.toLowerCase()) {
       case 'crypto':
-        return '₿';
+        return Icons.currency_bitcoin;
       case 'stock':
-        return '📈';
+        return Icons.show_chart;
       case 'gold':
-        return '🥇';
+        return Icons.workspace_premium;
       case 'cash':
-        return '💵';
+        return Icons.account_balance_wallet;
       case 'real_estate':
       case 'realestate':
-        return '🏠';
+        return Icons.home;
+      case 'business':
+        return Icons.business;
+      case 'retirement':
+        return Icons.account_balance;
+      case 'education':
+        return Icons.school;
+      case 'jewelry':
+        return Icons.diamond;
+      case 'vehicle':
+        return Icons.directions_car;
       default:
-        return '💰';
+        return Icons.savings;
     }
   }
 }

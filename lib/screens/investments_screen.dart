@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 import 'package:intl/intl.dart';
@@ -24,7 +24,7 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
     _loadData();
   }
 
-  ApiService get _api => ApiService(Provider.of<AuthService>(context, listen: false));
+  ApiService get _api => context.read<ApiService>();
 
   Future<void> _loadData() async {
     try {
@@ -236,7 +236,7 @@ class _InvestmentsScreenState extends State<InvestmentsScreen> {
         child: const Icon(Icons.add, color: Colors.white),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? ShimmerLoading()
           : RefreshIndicator(
               onRefresh: _loadData,
               child: ListView(
@@ -484,7 +484,7 @@ class _AccountDetailScreenState extends State<_AccountDetailScreen> {
     _loadAccount();
   }
 
-  ApiService get _api => ApiService(Provider.of<AuthService>(context, listen: false));
+  ApiService get _api => context.read<ApiService>();
 
   Future<void> _loadAccount() async {
     try {
@@ -771,7 +771,7 @@ class _AccountDetailScreenState extends State<_AccountDetailScreen> {
         child: const Icon(Icons.add, color: Colors.white),
       ),
       body: _loading
-          ? const Center(child: CircularProgressIndicator())
+          ? ShimmerLoading()
           : RefreshIndicator(
               onRefresh: _loadAccount,
               child: ListView(

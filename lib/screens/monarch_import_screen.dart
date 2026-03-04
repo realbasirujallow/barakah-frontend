@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:file_picker/file_picker.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 
@@ -57,7 +56,7 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
   @override
   void initState() {
     super.initState();
-    _api = ApiService(Provider.of<AuthService>(context, listen: false));
+    _api = context.read<ApiService>();
   }
 
   // ── Pick file & preview ─────────────────────────────────────────────────

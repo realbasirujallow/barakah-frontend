@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 
@@ -38,7 +37,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     setState(() { _loading = true; _error = null; });
     try {
-      final api = ApiService(Provider.of<AuthService>(context, listen: false));
+      final api = context.read<ApiService>();
       await api.forgotPassword(_emailController.text.trim());
       setState(() => _step = 1);
     } catch (e) {
@@ -64,7 +63,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     setState(() { _loading = true; _error = null; });
     try {
-      final api = ApiService(Provider.of<AuthService>(context, listen: false));
+      final api = context.read<ApiService>();
       await api.resetPassword(_tokenController.text.trim(), _newPasswordController.text);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

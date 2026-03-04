@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:barakah_app/widgets/shimmer_loading.dart';
 import 'package:provider/provider.dart';
-import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/api_service.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 
@@ -62,7 +62,7 @@ class _AutoCategorizeScreenState extends State<AutoCategorizeScreen> {
   Future<void> _loadReview() async {
     setState(() => _isLoading = true);
     try {
-      final api = ApiService(context.read<AuthService>());
+      final api = context.read<ApiService>();
       final data = await api.reviewCategories();
       setState(() {
         _review = data;
@@ -70,13 +70,14 @@ class _AutoCategorizeScreenState extends State<AutoCategorizeScreen> {
       });
     } catch (e) {
       setState(() => _isLoading = false);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Failed to load categories: ${ApiService.errorMessage(e)}'), backgroundColor: Colors.red));
     }
   }
 
   Future<void> _applyCategories() async {
     setState(() => _isApplying = true);
     try {
-      final api = ApiService(context.read<AuthService>());
+      final api = context.read<ApiService>();
       final result = await api.applyAutoCategories();
       setState(() {
         _appliedCount = result['updatedCount'] as int? ?? 0;
@@ -118,7 +119,7 @@ class _AutoCategorizeScreenState extends State<AutoCategorizeScreen> {
         ],
       ),
       body: _isLoading
-          ? const Center(child: CircularProgressIndicator(color: AppTheme.deepGreen))
+          ? ShimmerLoading()
           : _review == null
               ? const Center(child: Text('Failed to review'))
               : RefreshIndicator(
