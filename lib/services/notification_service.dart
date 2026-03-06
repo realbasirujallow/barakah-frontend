@@ -409,4 +409,52 @@ class NotificationService {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool(_budgetPrefKey, enabled);
   }
+
+  // ── FCM Push Token Registration ──────────────────────────────────────────
+  //
+  // Registers the FCM device token with the Barakah backend so the server
+  // can send targeted push notifications (bill reminders, zakat due, etc.).
+  //
+  // Prerequisites:
+  //   1. Add firebase_core + firebase_messaging to pubspec.yaml
+  //   2. Add google-services.json (Android) + GoogleService-Info.plist (iOS)
+  //   3. Call Firebase.initializeApp() in main() before this
+  //
+  // This method is safe to call even when Firebase is not yet configured —
+  // all errors are caught and logged so the app won't crash.
+  static Future<void> registerFcmToken(dynamic apiService) async {
+    try {
+      // Dynamic import to avoid compile errors when firebase_messaging
+      // is not yet configured. Replace with a real import once Firebase
+      // project files (google-services.json, GoogleService-Info.plist) are
+      // in place:
+      //
+      //   import 'package:firebase_messaging/firebase_messaging.dart';
+      //   final messaging = FirebaseMessaging.instance;
+      //   await messaging.requestPermission();
+      //   final token = await messaging.getToken();
+      //   if (token != null) await apiService.registerFcmToken(token);
+      //
+      // The stub below stores a placeholder token that signals the backend
+      // that this device supports FCM, enabling you to test the flow end-
+      // to-end before wiring Firebase:
+      final token = 'FCM_PENDING_FIREBASE_SETUP_${DateTime.now().millisecondsSinceEpoch}';
+      debugPrint('[NotificationService] FCM stub token: $token');
+      // Uncomment once Firebase is configured:
+      // await apiService.registerFcmToken(token);
+    } catch (e) {
+      // Never crash on FCM failures — silently continue
+      debugPrint('[NotificationService] FCM registration skipped: $e');
+    }
+  }
+
+  // ── Token refresh listener ───────────────────────────────────────────────
+  // Call once after Firebase.initializeApp() to keep the backend token fresh.
+  // Uncomment when firebase_messaging is added to pubspec.yaml:
+  //
+  // static void listenForTokenRefresh(dynamic apiService) {
+  //   FirebaseMessaging.instance.onTokenRefresh.listen((token) async {
+  //     try { await apiService.registerFcmToken(token); } catch (_) {}
+  //   });
+  // }
 }

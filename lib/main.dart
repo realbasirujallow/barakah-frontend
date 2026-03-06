@@ -34,6 +34,7 @@ import 'package:barakah_app/screens/shared_finances_screen.dart';
 import 'package:barakah_app/screens/investments_screen.dart';
 import 'package:barakah_app/screens/credit_score_screen.dart';
 import 'package:barakah_app/screens/monarch_import_screen.dart';
+import 'package:barakah_app/screens/currency_converter_screen.dart';
 import 'package:barakah_app/services/notification_service.dart';
 
 void main() async {
@@ -50,6 +51,8 @@ void main() async {
   final showOnboarding = await OnboardingScreen.shouldShow();
   // Initialize notifications
   await NotificationService().init();
+  // FCM token registration (no-op until Firebase project files are added)
+  await NotificationService.registerFcmToken(null);
 
   // Catch unhandled async errors so they don't crash the app silently
   runZonedGuarded(
@@ -118,6 +121,7 @@ class BarakahApp extends StatelessWidget {
               '/investments': (context) => const InvestmentsScreen(),
               '/credit-score': (context) => const CreditScoreScreen(),
               '/import': (context) => const MonarchImportScreen(),
+              '/currency': (context) => const CurrencyConverterScreen(),
             },
           );
         },

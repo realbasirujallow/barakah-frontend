@@ -4,6 +4,7 @@ import 'package:dio/dio.dart';
 import 'package:barakah_app/theme/app_theme.dart';
 import 'package:barakah_app/services/auth_service.dart';
 import 'package:barakah_app/services/currency_service.dart';
+import 'package:barakah_app/screens/currency_converter_screen.dart';
 import 'package:barakah_app/services/biometric_service.dart';
 import 'package:barakah_app/services/notification_service.dart';
 import 'package:barakah_app/services/cache_service.dart';
@@ -280,6 +281,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
             title: 'Default Currency',
             subtitle: '$_selectedCurrency - ${CurrencyService().getName(_selectedCurrency)}',
             onTap: () => _showCurrencyPicker(),
+          ),
+          const SizedBox(height: 4),
+          _settingsTile(
+            icon: Icons.compare_arrows,
+            title: 'Currency Converter',
+            subtitle: 'Convert between 15+ currencies with live rates',
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const CurrencyConverterScreen()),
+            ),
           ),
           const SizedBox(height: 16),
 
