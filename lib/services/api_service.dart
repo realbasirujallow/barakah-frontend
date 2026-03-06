@@ -865,4 +865,58 @@ class ApiService {
     final response = await _dio.get('/api/credit-score/simulate', queryParameters: params);
     return response.data as Map<String, dynamic>;
   }
+
+  // ─── Notifications / FCM ─────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> registerFcmToken(String token) async {
+    final response = await _dio.post(
+      '/api/notifications/fcm-token',
+      data: {'token': token},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getAppNotifications({int page = 0, int size = 30}) async {
+    final response = await _dio.get(
+      '/api/notifications',
+      queryParameters: {'page': page, 'size': size},
+    );
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> getUnreadNotifications() async {
+    final response = await _dio.get('/api/notifications/unread');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<void> markNotificationRead(int id) async {
+    await _dio.put('/api/notifications/$id/read');
+  }
+
+  Future<void> markAllNotificationsRead() async {
+    await _dio.put('/api/notifications/read-all');
+  }
+
+  Future<void> deleteAppNotification(int id) async {
+    await _dio.delete('/api/notifications/$id');
+  }
+
+  // ─── Currency ────────────────────────────────────────────────────────────
+
+  Future<Map<String, dynamic>> getCurrencyRates() async {
+    final response = await _dio.get('/api/currency/rates');
+    return response.data as Map<String, dynamic>;
+  }
+
+  Future<Map<String, dynamic>> convertCurrency({
+    required String from,
+    required String to,
+    required double amount,
+  }) async {
+    final response = await _dio.get(
+      '/api/currency/convert',
+      queryParameters: {'from': from, 'to': to, 'amount': amount},
+    );
+    return response.data as Map<String, dynamic>;
+  }
 }
