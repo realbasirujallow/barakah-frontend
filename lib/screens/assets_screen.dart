@@ -221,7 +221,7 @@ class _AssetsScreenState extends State<AssetsScreen> {
                       style: TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.bold,
-                        color: AppTheme.deepGreen.withValues(alpha: 0.7),
+                        color: AppTheme.deepGreen.withAlpha(179),
                       ),
                     ),
                   ),

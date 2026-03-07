@@ -178,7 +178,7 @@ class _CreditScoreScreenState extends State<CreditScoreScreen>
         borderRadius: BorderRadius.circular(20),
         boxShadow: [
           BoxShadow(
-            color: color.withValues(alpha: 0.2),
+            color: color.withAlpha(51),
             blurRadius: 20,
             spreadRadius: 2,
           ),
@@ -224,7 +224,7 @@ class _CreditScoreScreenState extends State<CreditScoreScreen>
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
+              color: color.withAlpha(38),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Text(
@@ -340,7 +340,7 @@ class _CreditScoreScreenState extends State<CreditScoreScreen>
       decoration: BoxDecoration(
         color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: color.withValues(alpha: 0.3)),
+        border: Border.all(color: color.withAlpha(77)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -348,7 +348,7 @@ class _CreditScoreScreenState extends State<CreditScoreScreen>
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.1),
+              color: color.withAlpha(26),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(icon, color: color, size: 20),
@@ -484,7 +484,7 @@ class _CreditScoreScreenState extends State<CreditScoreScreen>
         color: isDark ? const Color(0xFF1E1E2E) : Colors.white,
         borderRadius: BorderRadius.circular(14),
         border: Border.all(
-            color: statusColor.withValues(alpha: 0.3)),
+            color: statusColor.withAlpha(77)),
       ),
       child: Row(
         children: [
@@ -518,7 +518,7 @@ class _CreditScoreScreenState extends State<CreditScoreScreen>
                 padding:
                     const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                 decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.15),
+                  color: statusColor.withAlpha(38),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -628,7 +628,7 @@ class _CreditScoreScreenState extends State<CreditScoreScreen>
             width: 56,
             height: 56,
             decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.15),
+              color: color.withAlpha(38),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Center(
@@ -658,7 +658,7 @@ class _CreditScoreScreenState extends State<CreditScoreScreen>
                         padding: const EdgeInsets.symmetric(
                             horizontal: 8, vertical: 2),
                         decoration: BoxDecoration(
-                          color: color.withValues(alpha: 0.15),
+                          color: color.withAlpha(38),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Text('Latest',
@@ -681,8 +681,8 @@ class _CreditScoreScreenState extends State<CreditScoreScreen>
                   const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
                 color: delta >= 0
-                    ? Colors.green.withValues(alpha: 0.1)
-                    : Colors.red.withValues(alpha: 0.1),
+                    ? Colors.green.withAlpha(26)
+                    : Colors.red.withAlpha(26),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Row(
@@ -1175,8 +1175,8 @@ class _ScoreChartPainter extends CustomPainter {
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
         colors: [
-          Colors.teal.withValues(alpha: 0.3),
-          Colors.teal.withValues(alpha: 0.0),
+          Colors.teal.withAlpha(77),
+          Colors.teal.withAlpha(0),
         ],
       ).createShader(Rect.fromLTWH(0, 0, size.width, size.height));
     canvas.drawPath(fillPath, fillPaint);

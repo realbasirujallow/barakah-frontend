@@ -579,7 +579,7 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 4),
       padding: const EdgeInsets.symmetric(vertical: 8),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
+        color: color.withAlpha(26),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Column(children: [
@@ -592,7 +592,7 @@ class _MonarchImportScreenState extends State<MonarchImportScreen> {
   Widget _resultBadge(String label, Color color) => Container(
     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
     decoration: BoxDecoration(
-      color: color.withValues(alpha: 0.1),
+      color: color.withAlpha(26),
       borderRadius: BorderRadius.circular(20),
     ),
     child: Text(label, style: TextStyle(fontWeight: FontWeight.bold, color: color, fontSize: 16)),

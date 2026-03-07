@@ -19,6 +19,10 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
   int _ribaCount = 0;
   bool _isLoading = true;
 
+  // Delete mode is OFF by default — must be explicitly enabled by the user
+  bool _deleteMode = false;
+  final Set<int> _selectedIds = {};
+
   final _types = [
     'islamic_mortgage', 'conventional_mortgage', 'personal_loan',
     'car_loan', 'student_loan', 'credit_card', 'other'
@@ -285,6 +289,88 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
         title: const Text('Debt Tracker'),
         backgroundColor: AppTheme.deepGreen,
         foregroundColor: Colors.white,
+        actions: [
+          if (_deleteMode) ...[
+            // Select All button — only visible when delete mode is active
+            TextButton.icon(
+              onPressed: () {
+                setState(() {
+                  if (_selectedIds.length == _debts.length) {
+                    _selectedIds.clear();
+                  } else {
+                    _selectedIds.addAll(
+                      _debts.map((d) => (d as Map<String, dynamic>)['id'] as int),
+                    );
+                  }
+                });
+              },
+              icon: Icon(
+                _selectedIds.length == _debts.length
+                    ? Icons.deselect
+                    : Icons.select_all,
+                color: Colors.white,
+              ),
+              label: Text(
+                _selectedIds.length == _debts.length ? 'Deselect All' : 'Select All',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+            // Delete selected button
+            IconButton(
+              icon: const Icon(Icons.delete_sweep),
+              tooltip: 'Delete selected',
+              onPressed: _selectedIds.isEmpty
+                  ? null
+                  : () async {
+                      final confirm = await showDialog<bool>(
+                        context: context,
+                        builder: (ctx) => AlertDialog(
+                          title: const Text('Delete Debts'),
+                          content: Text(
+                            'Are you sure you want to delete ${_selectedIds.length} debt(s)? This cannot be undone.',
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(ctx, false),
+                              child: const Text('Cancel'),
+                            ),
+                            ElevatedButton(
+                              onPressed: () => Navigator.pop(ctx, true),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.red,
+                                foregroundColor: Colors.white,
+                              ),
+                              child: const Text('Delete'),
+                            ),
+                          ],
+                        ),
+                      );
+                      if (confirm == true && mounted) {
+                        final api = context.read<ApiService>();
+                        for (final id in _selectedIds) {
+                          await api.deleteDebt(id);
+                        }
+                        setState(() {
+                          _selectedIds.clear();
+                          _deleteMode = false;
+                        });
+                        _loadDebts();
+                      }
+                    },
+            ),
+          ],
+          // Toggle delete mode on/off
+          IconButton(
+            icon: Icon(_deleteMode ? Icons.close : Icons.delete_outline),
+            tooltip: _deleteMode ? 'Exit delete mode' : 'Enable delete mode',
+            onPressed: () {
+              setState(() {
+                _deleteMode = !_deleteMode;
+                if (!_deleteMode) _selectedIds.clear();
+              });
+            },
+          ),
+        ],
       ),
       body: _isLoading
           ? ShimmerLoading()
@@ -361,24 +447,61 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
                       final status = debt['status'] as String? ?? 'active';
                       final remaining = (debt['remainingAmount'] as num?)?.toDouble() ?? 0;
 
-                      return Container(
+                      final debtId = debt['id'] as int;
+                      final isSelected = _selectedIds.contains(debtId);
+
+                      return GestureDetector(
+                        onTap: _deleteMode
+                            ? () {
+                                setState(() {
+                                  if (isSelected) {
+                                    _selectedIds.remove(debtId);
+                                  } else {
+                                    _selectedIds.add(debtId);
+                                  }
+                                });
+                              }
+                            : null,
+                        child: Container(
                         margin: const EdgeInsets.only(bottom: 12),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: theme.cardColor,
+                          color: _deleteMode && isSelected
+                              ? Colors.red.withAlpha(20)
+                              : theme.cardColor,
                           borderRadius: BorderRadius.circular(12),
-                          border: !ribaFree ? Border.all(color: Colors.red.shade300) : null,
+                          border: _deleteMode && isSelected
+                              ? Border.all(color: Colors.red.shade400, width: 2)
+                              : !ribaFree
+                                  ? Border.all(color: Colors.red.shade300)
+                                  : null,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Row(
                               children: [
-                                Icon(
-                                  ribaFree ? Icons.check_circle : Icons.warning,
-                                  color: ribaFree ? Colors.green : Colors.red,
-                                  size: 20,
-                                ),
+                                // Show checkbox in delete mode, riba/halal icon otherwise
+                                if (_deleteMode)
+                                  Checkbox(
+                                    value: isSelected,
+                                    activeColor: Colors.red,
+                                    onChanged: (_) {
+                                      setState(() {
+                                        if (isSelected) {
+                                          _selectedIds.remove(debtId);
+                                        } else {
+                                          _selectedIds.add(debtId);
+                                        }
+                                      });
+                                    },
+                                  )
+                                else
+                                  Icon(
+                                    ribaFree ? Icons.check_circle : Icons.warning,
+                                    color: ribaFree ? Colors.green : Colors.red,
+                                    size: 20,
+                                  ),
                                 const SizedBox(width: 8),
                                 Expanded(
                                   child: Text(
@@ -395,14 +518,33 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
                                     ),
                                     child: const Text('Paid Off', style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12)),
                                   ),
+                                // Hide popup menu while in delete mode to avoid confusion
+                                if (!_deleteMode)
                                 PopupMenuButton<String>(
                                   onSelected: (v) async {
                                     if (v == 'pay') {
                                       _showPaymentDialog(debt);
                                     } else if (v == 'delete') {
-                                      final api = context.read<ApiService>();
-                                      await api.deleteDebt(debt['id'] as int);
-                                      _loadDebts();
+                                      final confirm = await showDialog<bool>(
+                                        context: context,
+                                        builder: (ctx) => AlertDialog(
+                                          title: const Text('Delete Debt'),
+                                          content: Text('Delete "${debt['name']}"? This cannot be undone.'),
+                                          actions: [
+                                            TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Cancel')),
+                                            ElevatedButton(
+                                              onPressed: () => Navigator.pop(ctx, true),
+                                              style: ElevatedButton.styleFrom(backgroundColor: Colors.red, foregroundColor: Colors.white),
+                                              child: const Text('Delete'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      if (confirm == true && mounted) {
+                                        final api = context.read<ApiService>();
+                                        await api.deleteDebt(debt['id'] as int);
+                                        _loadDebts();
+                                      }
                                     }
                                   },
                                   itemBuilder: (_) => [
@@ -451,16 +593,20 @@ class _DebtTrackerScreenState extends State<DebtTrackerScreen> {
                             ],
                           ],
                         ),
-                      );
+                        ), // Container
+                      ); // GestureDetector
                     })),
                 ],
               ),
             ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _showAddDebt,
-        backgroundColor: AppTheme.deepGreen,
-        child: const Icon(Icons.add, color: Colors.white),
-      ),
+      // Hide the Add button while delete mode is active
+      floatingActionButton: _deleteMode
+          ? null
+          : FloatingActionButton(
+              onPressed: _showAddDebt,
+              backgroundColor: AppTheme.deepGreen,
+              child: const Icon(Icons.add, color: Colors.white),
+            ),
     );
   }
 }
